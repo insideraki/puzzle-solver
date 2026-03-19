@@ -4,36 +4,121 @@ const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
 const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
 
 const STRINGS = {
-  ja: { title: 'パズル＆サバイバル\n英雄特技 最適化ツール', chest: '手持ちチェス', search: '最適配置を探索', loading: '最適配置を探索中...', found: 'パターンの最適配置が見つかりました', of: '/', power: '戦力UP', status: '有効ステータス数', fighter: 'ファイター', shooter: 'シューター', rider: 'ライダー', troop: '部隊', hint: 'チェスを増やすとさらに選択肢が広がります', none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。', err: 'エラーが発生しました。もう一度お試しください。', share: 'シェア', discord_copy: 'Discord にコピー', copied: 'クリップボードにコピーしました' },
-  en: { title: 'Puzzle & Survival\nHero Skill Optimizer', chest: 'Chess Pieces', search: 'Find Optimal Setup', loading: 'Searching...', found: 'optimal pattern(s) found', of: '/', power: 'Power UP', status: 'Active Stats', fighter: 'Fighter', shooter: 'Shooter', rider: 'Rider', troop: 'Troop', hint: 'More pieces = more options', none: 'No patterns found.\nTry adding more pieces.', err: 'An error occurred. Please try again.', share: 'Share', discord_copy: 'Copy for Discord', copied: 'Copied to clipboard' },
-  zh: { title: '谜题与生存\n英雄技能优化工具', chest: '持有棋子', search: '搜索最优配置', loading: '正在搜索...', found: '个最优配置', of: '/', power: '战力提升', status: '有效状态数', fighter: '战士', shooter: '射手', rider: '骑士', troop: '部队', hint: '增加棋子可获得更多选择', none: '未找到配置方案。\n请增加棋子数量。', err: '发生错误，请重试。', share: '分享', discord_copy: '复制到 Discord', copied: '已复制到剪贴板' },
-  ru: { title: 'Puzzle & Survival\nОптимизатор навыков', chest: 'Шахматные фигуры', search: 'Найти оптимум', loading: 'Поиск...', found: 'вариант(ов) найдено', of: '/', power: 'Рост силы', status: 'Активных статов', fighter: 'Боец', shooter: 'Стрелок', rider: 'Всадник', troop: 'Отряд', hint: 'Больше фигур — больше вариантов', none: 'Варианты не найдены.\nДобавьте больше фигур.', err: 'Произошла ошибка. Попробуйте снова.', share: 'Поделиться', discord_copy: 'Скопировать для Discord', copied: 'Скопировано в буфер обмена' },
+  ja: {
+    title: 'パズル＆サバイバル\n英雄特技 最適化ツール',
+    chest: '手持ちチェス',
+    unitPref: '兵種選択',
+    unitHint: '自分の主力兵種を選ぶと速く計算できます',
+    search: '最適配置を探索',
+    loading: '最適配置を探索中...',
+    found: 'パターンの最適配置が見つかりました',
+    of: '/',
+    power: '戦力UP',
+    status: '有効ステータス数',
+    fighter: 'ファイター',
+    shooter: 'シューター',
+    rider: 'ライダー',
+    troop: '部隊',
+    allUnit: '戦力UP重視',
+    hint: 'チェスを増やすとさらに選択肢が広がります',
+    none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
+    err: 'エラーが発生しました。もう一度お試しください。',
+    share: 'シェア',
+    discord_copy: 'Discord にコピー',
+    copied: 'クリップボードにコピーしました',
+  },
+  en: {
+    title: 'Puzzle & Survival\nHero Skill Optimizer',
+    chest: 'Chess Pieces',
+    unitPref: 'Unit Type',
+    unitHint: 'Select your main unit for faster results',
+    search: 'Find Optimal Setup',
+    loading: 'Searching...',
+    found: 'optimal pattern(s) found',
+    of: '/',
+    power: 'Power UP',
+    status: 'Active Stats',
+    fighter: 'Fighter',
+    shooter: 'Shooter',
+    rider: 'Rider',
+    troop: 'Troop',
+    allUnit: 'Max Power',
+    hint: 'More pieces = more options',
+    none: 'No patterns found.\nTry adding more pieces.',
+    err: 'An error occurred. Please try again.',
+    share: 'Share',
+    discord_copy: 'Copy for Discord',
+    copied: 'Copied to clipboard',
+  },
+  zh: {
+    title: '谜题与生存\n英雄技能优化工具',
+    chest: '持有棋子',
+    unitPref: '兵种选择',
+    unitHint: '选择主力兵种可加快计算速度',
+    search: '搜索最优配置',
+    loading: '正在搜索...',
+    found: '个最优配置',
+    of: '/',
+    power: '战力提升',
+    status: '有效状态数',
+    fighter: '战士',
+    shooter: '射手',
+    rider: '骑士',
+    troop: '部队',
+    allUnit: '战力优先',
+    hint: '增加棋子可获得更多选择',
+    none: '未找到配置方案。\n请增加棋子数量。',
+    err: '发生错误，请重试。',
+    share: '分享',
+    discord_copy: '复制到 Discord',
+    copied: '已复制到剪贴板',
+  },
+  ru: {
+    title: 'Puzzle & Survival\nОптимизатор навыков',
+    chest: 'Шахматные фигуры',
+    unitPref: 'Тип войска',
+    unitHint: 'Выберите тип для ускорения расчёта',
+    search: 'Найти оптимум',
+    loading: 'Поиск...',
+    found: 'вариант(ов) найдено',
+    of: '/',
+    power: 'Рост силы',
+    status: 'Активных статов',
+    fighter: 'Боец',
+    shooter: 'Стрелок',
+    rider: 'Всадник',
+    troop: 'Отряд',
+    allUnit: 'Макс. сила',
+    hint: 'Больше фигур — больше вариантов',
+    none: 'Варианты не найдены.\nДобавьте больше фигур.',
+    err: 'Произошла ошибка. Попробуйте снова.',
+    share: 'Поделиться',
+    discord_copy: 'Скопировать для Discord',
+    copied: 'Скопировано в буфер обмена',
+  },
 }
 
 const API_URL = 'https://puzzle-solver-api.onrender.com'
-
 
 const F1 = ['blue','blue','blue','blue','gold','gold','purple','blue','green','green','green','green','gold','purple','blue','green','red','green','empty','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
 const F2 = ['red','red','red','red','gold','gold','purple','blue','green','red','green','green','gold','purple','blue','green','red','green','blue','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
 
 function makeDummyPatterns(t) {
   return [
-    { power: 60000, status_count: 18, fields: [{ label: '特技1', field: F1 }, { label: '特技2', field: F2 }], buffs: { [t.fighter]: { ATK: 40, DEF: 20, HP: 10 }, [t.shooter]: { ATK: 40, DEF: 10, HP: 10 }, [t.rider]: { ATK: 0, DEF: 10, HP: 10 }, [t.troop]: { ATK: 0, DEF: 40, HP: 40 } } },
-    { power: 55000, status_count: 16, fields: [{ label: '特技1', field: F2 }], buffs: { [t.fighter]: { ATK: 40, DEF: 10, HP: 0 }, [t.shooter]: { ATK: 20, DEF: 10, HP: 0 }, [t.rider]: { ATK: 40, DEF: 10, HP: 0 }, [t.troop]: { ATK: 0, DEF: 40, HP: 40 } } },
-    { power: 50000, status_count: 20, fields: [{ label: '特技1', field: F1 }], buffs: { [t.fighter]: { ATK: 20, DEF: 10, HP: 10 }, [t.shooter]: { ATK: 0, DEF: 10, HP: 10 }, [t.rider]: { ATK: 0, DEF: 10, HP: 10 }, [t.troop]: { ATK: 0, DEF: 40, HP: 40 } } },
-    { power: 45000, status_count: 22, fields: [{ label: '特技1', field: F2 }], buffs: { [t.fighter]: { ATK: 20, DEF: 10, HP: 10 }, [t.shooter]: { ATK: 20, DEF: 10, HP: 10 }, [t.rider]: { ATK: 20, DEF: 10, HP: 10 }, [t.troop]: { ATK: 0, DEF: 40, HP: 40 } } },
+    { power: 60000, status_count: 18, fields: [{ label: '特技1', field: F1 }, { label: '特技2', field: F2 }], buffs: { F: { ATK: 40, DEF: 20, HP: 10 }, S: { ATK: 40, DEF: 10, HP: 10 }, R: { ATK: 0, DEF: 10, HP: 10 }, '部隊': { ATK: 0, DEF: 40, HP: 40 } } },
+    { power: 55000, status_count: 16, fields: [{ label: '特技1', field: F2 }], buffs: { F: { ATK: 40, DEF: 10, HP: 0 }, S: { ATK: 20, DEF: 10, HP: 0 }, R: { ATK: 40, DEF: 10, HP: 0 }, '部隊': { ATK: 0, DEF: 40, HP: 40 } } },
   ]
 }
 
-async function fetchSolve(pieces, t) {
+async function fetchSolve(pieces, unitPref, t) {
   if (!API_URL) {
     await new Promise(r => setTimeout(r, 1800))
-    return { total: 4, patterns: makeDummyPatterns(t) }
+    return { total: 2, patterns: makeDummyPatterns(t) }
   }
   const res = await fetch(`${API_URL}/solve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(pieces),
+    body: JSON.stringify({ ...pieces, unit_pref: unitPref }),
   })
   if (!res.ok) throw new Error('API error')
   return res.json()
@@ -44,11 +129,12 @@ async function fetchSolve(pieces, t) {
 // ============================================================
 function buildShareText(pattern, t) {
   const b = pattern.buffs
-  const lines = [t.fighter, t.shooter, t.rider, t.troop].map(u => {
+  const lines = ['F','S','R','部隊'].map(key => {
+    const label = { F: t.fighter, S: t.shooter, R: t.rider, '部隊': t.troop }[key]
     const parts = ['ATK', 'DEF', 'HP']
-      .filter(s => (b[u]?.[s] ?? 0) > 0)
-      .map(s => `${s}+${b[u][s]}%`)
-    return parts.length ? `${u}: ${parts.join(' / ')}` : null
+      .filter(s => (b[key]?.[s] ?? 0) > 0)
+      .map(s => `${s}+${b[key][s]}%`)
+    return parts.length ? `${label}: ${parts.join(' / ')}` : null
   }).filter(Boolean)
   return `【パズル＆サバイバル 英雄特技】\n戦力+${pattern.power.toLocaleString()} / 有効ステータス${pattern.status_count}\n${lines.join('\n')}\n無料最適化ツール👇\n${TOOL_URL}`
 }
@@ -58,7 +144,6 @@ function buildShareText(pattern, t) {
 // ============================================================
 function ShareButtons({ pattern, t }) {
   const [toast, setToast] = useState(false)
-
   const text = buildShareText(pattern, t)
 
   const handleDiscord = () => {
@@ -80,7 +165,7 @@ function ShareButtons({ pattern, t }) {
   )
   const IconLINE = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+      <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.630 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.630 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
     </svg>
   )
   const IconDiscord = () => (
@@ -93,24 +178,10 @@ function ShareButtons({ pattern, t }) {
     <div className="share-section">
       <div className="share-label">{t.share}</div>
       <div className="share-row">
-        <a
-          className="share-btn btn-x"
-          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`}
-          target="_blank" rel="noreferrer"
-        ><IconX /> X</a>
-        <a
-          className="share-btn btn-fb"
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(TOOL_URL)}`}
-          target="_blank" rel="noreferrer"
-        ><IconFB /> Facebook</a>
-        <a
-          className="share-btn btn-line"
-          href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(TOOL_URL)}&text=${encodeURIComponent(text)}`}
-          target="_blank" rel="noreferrer"
-        ><IconLINE /> LINE</a>
-        <button className="share-btn btn-discord" onClick={handleDiscord}>
-          <IconDiscord /> {t.discord_copy}
-        </button>
+        <a className="share-btn btn-x" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><IconX /> X</a>
+        <a className="share-btn btn-fb" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(TOOL_URL)}`} target="_blank" rel="noreferrer"><IconFB /> Facebook</a>
+        <a className="share-btn btn-line" href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(TOOL_URL)}&text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><IconLINE /> LINE</a>
+        <button className="share-btn btn-discord" onClick={handleDiscord}><IconDiscord /> {t.discord_copy}</button>
       </div>
       {toast && <div className="toast-msg">{t.copied}</div>}
     </div>
@@ -118,33 +189,23 @@ function ShareButtons({ pattern, t }) {
 }
 
 // ============================================================
-// ローディング
+// ローディング（テキストログ表示）
 // ============================================================
-function LoadingAnimation({ text }) {
-  const [lit, setLit] = useState(new Set())
-  const started = useRef(false)
-  if (!started.current) {
-    started.current = true
-    let i = 0
-    const order = Array.from({ length: 35 }, (_, idx) => idx).sort(() => Math.random() - 0.5)
-    const id = setInterval(() => {
-      setLit(() => {
-        const next = new Set()
-        for (let k = 0; k < 7; k++) next.add(order[(i + k) % 35])
-        i = (i + 7) % 35
-        return next
-      })
-    }, 120)
-    setTimeout(() => clearInterval(id), 30000)
-  }
+function LoadingLog({ logs }) {
+  const bottomRef = useRef(null)
+  // 新しいログが来たら自動スクロール
+  useRef(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  })
+
   return (
-    <div className="loading-wrap">
-      <div className="loading-grid">
-        {Array.from({ length: 35 }, (_, i) => (
-          <div key={i} className={`loading-cell${lit.has(i) ? ' lit' : ''}`} />
-        ))}
-      </div>
-      <div className="loading-text">{text}</div>
+    <div className="loading-log">
+      {logs.map((line, i) => (
+        <div key={i} className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}>
+          {line}
+        </div>
+      ))}
+      <div ref={bottomRef} />
     </div>
   )
 }
@@ -160,7 +221,9 @@ function FieldGrid({ field, label }) {
         {field.map((color, i) => (
           <div key={i} className={`field-cell${color === 'empty' ? ' empty' : ''}`}>
             {color !== 'empty' && (
-              <div className={`piece ${color}`}><div className="piece-inner" /></div>
+              <div className={`piece ${color}`}>
+                <div className="piece-inner" />
+              </div>
             )}
           </div>
         ))}
@@ -174,10 +237,10 @@ function FieldGrid({ field, label }) {
 // ============================================================
 function BuffTable({ buffs, t }) {
   const units = [
-    { key: "F",    label: t.fighter },
-    { key: "S",    label: t.shooter },
-    { key: "R",    label: t.rider   },
-    { key: "部隊", label: t.troop   },
+    { key: 'F',    label: t.fighter },
+    { key: 'S',    label: t.shooter },
+    { key: 'R',    label: t.rider   },
+    { key: '部隊', label: t.troop   },
   ]
   return (
     <table className="buff-table">
@@ -251,26 +314,100 @@ function Carousel({ patterns, t }) {
 }
 
 // ============================================================
+// 兵種選択ボタン
+// ============================================================
+function UnitSelector({ value, onChange, t }) {
+  const options = [
+    { key: 'fighter', label: `⚔️ ${t.fighter}` },
+    { key: 'shooter', label: `🏹 ${t.shooter}` },
+    { key: 'rider',   label: `🐴 ${t.rider}` },
+    { key: 'all',     label: `⚡ ${t.allUnit}` },
+  ]
+  return (
+    <div className="unit-selector-section">
+      <div className="chest-label">{t.unitPref}</div>
+      <div className="unit-selector-row">
+        {options.map(opt => (
+          <button
+            key={opt.key}
+            className={`unit-btn${value === opt.key ? ' active' : ''}`}
+            onClick={() => onChange(opt.key)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <div className="unit-hint">{t.unitHint}</div>
+    </div>
+  )
+}
+
+// ============================================================
 // メインApp
 // ============================================================
 export default function App() {
   const [lang, setLang] = useState('ja')
   const [pieces, setPieces] = useState({ green: 8, blue: 2, purple: 8, gold: 7, red: 8 })
+  const [unitPref, setUnitPref] = useState('fighter')
   const [status, setStatus] = useState('idle')
   const [result, setResult] = useState(null)
+  const [logs, setLogs] = useState([])
   const t = STRINGS[lang]
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
 
+  const addLog = (line) => setLogs(prev => [...prev, line])
+
   const handleSolve = async () => {
     setStatus('loading')
     setResult(null)
+    setLogs([])
+
+    const total = Object.values(pieces).reduce((a, b) => a + b, 0)
+    const isDouble = total >= 30
+    const unitLabel = {
+      fighter: t.fighter, shooter: t.shooter,
+      rider: t.rider, all: t.allUnit,
+    }[unitPref]
+    const targets = unitPref === 'all'
+      ? [t.fighter, t.shooter, t.rider]
+      : [unitLabel]
+
+    // 擬似ログ（実際のAPI応答を待ちながら表示）
+    addLog(`[init] 手持ち: 緑${pieces.green} 青${pieces.blue} 紫${pieces.purple} 金${pieces.gold} 赤${pieces.red}`)
+    addLog(`[init] 兵種: ${unitLabel}  フィールド数: ${isDouble ? 2 : 1}`)
+
+    let logIdx = 0
+    const logTimer = setInterval(() => {
+      if (logIdx < targets.length) {
+        addLog(`[solver] ${targets[logIdx]} で計算中...`)
+        logIdx++
+      } else if (isDouble && logIdx === targets.length) {
+        addLog(`[solver] 特技2（残り駒）を計算中...`)
+        logIdx++
+      }
+    }, 600)
+
     try {
-      const data = await fetchSolve(pieces, t)
+      const data = await fetchSolve(pieces, unitPref, t)
+      clearInterval(logTimer)
+
+      if (data.patterns?.length > 0) {
+        const p = data.patterns[0]
+        addLog(`[done]  戦力UP: +${p.power.toLocaleString()}  有効ステータス: ${p.status_count}`)
+        if (isDouble) {
+          addLog(`[done]  特技1+特技2 合計戦力: +${p.power.toLocaleString()}`)
+        }
+      } else {
+        addLog(`[done]  配置可能なパターンが見つかりませんでした`)
+      }
+
       setResult(data)
       setStatus('done')
     } catch {
+      clearInterval(logTimer)
+      addLog(`[error] APIエラーが発生しました`)
       setStatus('error')
     }
   }
@@ -304,6 +441,9 @@ export default function App() {
             </div>
           ))}
         </div>
+
+        <UnitSelector value={unitPref} onChange={setUnitPref} t={t} />
+
         <div className="search-btn-wrap">
           <button className="search-btn" onClick={handleSolve} disabled={status === 'loading'}>
             {t.search}
@@ -314,7 +454,10 @@ export default function App() {
       {/* 広告スペース */}
       <div className="ad-space" />
 
-      {status === 'loading' && <LoadingAnimation text={t.loading} />}
+      {(status === 'loading' || (status !== 'idle' && logs.length > 0)) && (
+        <LoadingLog logs={logs} />
+      )}
+
       {status === 'error' && <div className="no-result">{t.err}</div>}
       {status === 'done' && result && (
         result.total === 0
