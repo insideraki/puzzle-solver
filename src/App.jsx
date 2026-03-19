@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 
 const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
-const TOOL_URL = 'https://your-tool.vercel.app' // 公開後に変更
+const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
 
 const STRINGS = {
   ja: { title: 'パズル＆サバイバル\n英雄特技 最適化ツール', chest: '手持ちチェス', search: '最適配置を探索', loading: '最適配置を探索中...', found: 'パターンの最適配置が見つかりました', of: '/', power: '戦力UP', status: '有効ステータス数', fighter: 'ファイター', shooter: 'シューター', rider: 'ライダー', troop: '部隊', hint: 'チェスを増やすとさらに選択肢が広がります', none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。', err: 'エラーが発生しました。もう一度お試しください。', share: 'シェア', discord_copy: 'Discord にコピー', copied: 'クリップボードにコピーしました' },
