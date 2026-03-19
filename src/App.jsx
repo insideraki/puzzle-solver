@@ -173,18 +173,23 @@ function FieldGrid({ field, label }) {
 // バフテーブル
 // ============================================================
 function BuffTable({ buffs, t }) {
-  const units = [t.fighter, t.shooter, t.rider, t.troop]
+  const units = [
+    { key: "F",    label: t.fighter },
+    { key: "S",    label: t.shooter },
+    { key: "R",    label: t.rider   },
+    { key: "部隊", label: t.troop   },
+  ]
   return (
     <table className="buff-table">
       <thead>
         <tr><th></th><th>ATK</th><th>DEF</th><th>HP</th></tr>
       </thead>
       <tbody>
-        {units.map(u => (
-          <tr key={u}>
-            <td>{u}</td>
+        {units.map(({ key, label }) => (
+          <tr key={key}>
+            <td>{label}</td>
             {['ATK', 'DEF', 'HP'].map(s => {
-              const val = buffs[u]?.[s] ?? 0
+              const val = buffs[key]?.[s] ?? 0
               return <td key={s} className={val === 0 ? 'buff-zero' : ''}>{val === 0 ? '—' : `+${val}%`}</td>
             })}
           </tr>
