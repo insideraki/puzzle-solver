@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
 const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
@@ -10,7 +10,6 @@ const STRINGS = {
     unitPref: '兵種選択',
     unitHint: '自分の主力兵種を選ぶと速く計算できます',
     search: '最適配置を探索',
-    loading: '最適配置を探索中...',
     found: 'パターンの最適配置が見つかりました',
     of: '/',
     power: '戦力UP',
@@ -33,7 +32,6 @@ const STRINGS = {
     unitPref: 'Unit Type',
     unitHint: 'Select your main unit for faster results',
     search: 'Find Optimal Setup',
-    loading: 'Searching...',
     found: 'optimal pattern(s) found',
     of: '/',
     power: 'Power UP',
@@ -56,7 +54,6 @@ const STRINGS = {
     unitPref: '兵种选择',
     unitHint: '选择主力兵种可加快计算速度',
     search: '搜索最优配置',
-    loading: '正在搜索...',
     found: '个最优配置',
     of: '/',
     power: '战力提升',
@@ -79,7 +76,6 @@ const STRINGS = {
     unitPref: 'Тип войска',
     unitHint: 'Выберите тип для ускорения расчёта',
     search: 'Найти оптимум',
-    loading: 'Поиск...',
     found: 'вариант(ов) найдено',
     of: '/',
     power: 'Рост силы',
@@ -99,30 +95,6 @@ const STRINGS = {
 }
 
 const API_URL = 'https://puzzle-solver-api.onrender.com'
-
-const F1 = ['blue','blue','blue','blue','gold','gold','purple','blue','green','green','green','green','gold','purple','blue','green','red','green','empty','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
-const F2 = ['red','red','red','red','gold','gold','purple','blue','green','red','green','green','gold','purple','blue','green','red','green','blue','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
-
-function makeDummyPatterns(t) {
-  return [
-    { power: 60000, status_count: 18, fields: [{ label: '特技1', field: F1 }, { label: '特技2', field: F2 }], buffs: { F: { ATK: 40, DEF: 20, HP: 10 }, S: { ATK: 40, DEF: 10, HP: 10 }, R: { ATK: 0, DEF: 10, HP: 10 }, '部隊': { ATK: 0, DEF: 40, HP: 40 } } },
-    { power: 55000, status_count: 16, fields: [{ label: '特技1', field: F2 }], buffs: { F: { ATK: 40, DEF: 10, HP: 0 }, S: { ATK: 20, DEF: 10, HP: 0 }, R: { ATK: 40, DEF: 10, HP: 0 }, '部隊': { ATK: 0, DEF: 40, HP: 40 } } },
-  ]
-}
-
-async function fetchSolve(pieces, unitPref, t) {
-  if (!API_URL) {
-    await new Promise(r => setTimeout(r, 1800))
-    return { total: 2, patterns: makeDummyPatterns(t) }
-  }
-  const res = await fetch(`${API_URL}/solve`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...pieces, unit_pref: unitPref }),
-  })
-  if (!res.ok) throw new Error('API error')
-  return res.json()
-}
 
 // ============================================================
 // シェアテキスト生成
@@ -189,19 +161,22 @@ function ShareButtons({ pattern, t }) {
 }
 
 // ============================================================
-// ローディング（テキストログ表示）
+// ローディングログ（リアルタイムSSE）
 // ============================================================
 function LoadingLog({ logs }) {
   const bottomRef = useRef(null)
-  // 新しいログが来たら自動スクロール
-  useRef(() => {
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  })
+  }, [logs])
 
   return (
     <div className="loading-log">
       {logs.map((line, i) => (
-        <div key={i} className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}>
+        <div
+          key={i}
+          className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}
+        >
           {line}
         </div>
       ))}
@@ -352,62 +327,60 @@ export default function App() {
   const [status, setStatus] = useState('idle')
   const [result, setResult] = useState(null)
   const [logs, setLogs] = useState([])
+  const esRef = useRef(null)
   const t = STRINGS[lang]
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
 
-  const addLog = (line) => setLogs(prev => [...prev, line])
+  const handleSolve = () => {
+    // 前回のSSE接続を閉じる
+    if (esRef.current) {
+      esRef.current.close()
+      esRef.current = null
+    }
 
-  const handleSolve = async () => {
     setStatus('loading')
     setResult(null)
     setLogs([])
 
-    const total = Object.values(pieces).reduce((a, b) => a + b, 0)
-    const isDouble = total >= 30
-    const unitLabel = {
-      fighter: t.fighter, shooter: t.shooter,
-      rider: t.rider, all: t.allUnit,
-    }[unitPref]
-    const targets = unitPref === 'all'
-      ? [t.fighter, t.shooter, t.rider]
-      : [unitLabel]
+    const params = new URLSearchParams({
+      green:     pieces.green,
+      blue:      pieces.blue,
+      purple:    pieces.purple,
+      gold:      pieces.gold,
+      red:       pieces.red,
+      unit_pref: unitPref,
+    })
 
-    // 擬似ログ（実際のAPI応答を待ちながら表示）
-    addLog(`[init] 手持ち: 緑${pieces.green} 青${pieces.blue} 紫${pieces.purple} 金${pieces.gold} 赤${pieces.red}`)
-    addLog(`[init] 兵種: ${unitLabel}  フィールド数: ${isDouble ? 2 : 1}`)
+    const es = new EventSource(`${API_URL}/solve/stream?${params}`)
+    esRef.current = es
 
-    let logIdx = 0
-    const logTimer = setInterval(() => {
-      if (logIdx < targets.length) {
-        addLog(`[solver] ${targets[logIdx]} で計算中...`)
-        logIdx++
-      } else if (isDouble && logIdx === targets.length) {
-        addLog(`[solver] 特技2（残り駒）を計算中...`)
-        logIdx++
-      }
-    }, 600)
+    es.onmessage = (e) => {
+      const data = e.data
 
-    try {
-      const data = await fetchSolve(pieces, unitPref, t)
-      clearInterval(logTimer)
-
-      if (data.patterns?.length > 0) {
-        const p = data.patterns[0]
-        addLog(`[done]  戦力UP: +${p.power.toLocaleString()}  有効ステータス: ${p.status_count}`)
-        if (isDouble) {
-          addLog(`[done]  特技1+特技2 合計戦力: +${p.power.toLocaleString()}`)
+      if (data.startsWith('[RESULT]')) {
+        // 最終結果
+        try {
+          const json = JSON.parse(data.slice(8))
+          setResult(json)
+        } catch {
+          setStatus('error')
         }
+      } else if (data === '[END]') {
+        es.close()
+        esRef.current = null
+        setStatus('done')
       } else {
-        addLog(`[done]  配置可能なパターンが見つかりませんでした`)
+        // ログ行を追加
+        setLogs(prev => [...prev, data])
       }
+    }
 
-      setResult(data)
-      setStatus('done')
-    } catch {
-      clearInterval(logTimer)
-      addLog(`[error] APIエラーが発生しました`)
+    es.onerror = () => {
+      es.close()
+      esRef.current = null
+      setLogs(prev => [...prev, '[error] 接続エラーが発生しました'])
       setStatus('error')
     }
   }
@@ -454,11 +427,10 @@ export default function App() {
       {/* 広告スペース */}
       <div className="ad-space" />
 
-      {(status === 'loading' || (status !== 'idle' && logs.length > 0)) && (
-        <LoadingLog logs={logs} />
-      )}
+      {/* ログ表示（計算中も完了後も表示し続ける） */}
+      {logs.length > 0 && <LoadingLog logs={logs} />}
 
-      {status === 'error' && <div className="no-result">{t.err}</div>}
+      {status === 'error' && logs.length === 0 && <div className="no-result">{t.err}</div>}
       {status === 'done' && result && (
         result.total === 0
           ? <div className="no-result">{t.none}</div>
