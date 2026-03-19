@@ -12,6 +12,7 @@ const STRINGS = {
 
 const API_URL = 'https://puzzle-solver-api.onrender.com'
 
+
 const F1 = ['blue','blue','blue','blue','gold','gold','purple','blue','green','green','green','green','gold','purple','blue','green','red','green','empty','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
 const F2 = ['red','red','red','red','gold','gold','purple','blue','green','red','green','green','gold','purple','blue','green','red','green','blue','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
 
