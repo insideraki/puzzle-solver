@@ -5,10 +5,10 @@ const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
 
 const STRINGS = {
   ja: {
-    title: 'パズル＆サバイバル\n英雄特技 最適化ツール',
+    title: 'パズル&サバイバル\n英雄特技 最適化ツール',
     chest: '手持ちチェス',
     unitPref: '兵種選択',
-    unitHint: '自分の主力兵種を選ぶと速く計算できます',
+    unitHint: '自軍の主力兵種を選ぶと速く最適化できます',
     search: '最適配置を探索',
     found: 'パターンの最適配置が見つかりました',
     of: '/',
@@ -18,13 +18,15 @@ const STRINGS = {
     shooter: 'シューター',
     rider: 'ライダー',
     troop: '部隊',
-    allUnit: '戦力UP重視',
+    allUnit: '戦力重視',
     hint: 'チェスを増やすとさらに選択肢が広がります',
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
-    err: 'エラーが発生しました。もう一度お試しください。',
+    err: 'エラーが発生しました。もう一度試してください。',
     share: 'シェア',
     discord_copy: 'Discord にコピー',
     copied: 'クリップボードにコピーしました',
+    computing: '計算中...',
+    loading_wasm: 'ソルバーを読み込み中...',
   },
   en: {
     title: 'Puzzle & Survival\nHero Skill Optimizer',
@@ -47,28 +49,32 @@ const STRINGS = {
     share: 'Share',
     discord_copy: 'Copy for Discord',
     copied: 'Copied to clipboard',
+    computing: 'Computing...',
+    loading_wasm: 'Loading solver...',
   },
   zh: {
-    title: '谜题与生存\n英雄技能优化工具',
-    chest: '持有棋子',
-    unitPref: '兵种选择',
-    unitHint: '选择主力兵种可加快计算速度',
+    title: '末日喧嚣\n英雄技能优化器',
+    chest: '棋子数量',
+    unitPref: '兵种偏好',
+    unitHint: '选择主力兵种可加快优化速度',
     search: '搜索最优配置',
-    found: '个最优配置',
+    found: '找到最优配置',
     of: '/',
-    power: '战力提升',
+    power: '提升战力',
     status: '有效状态数',
-    fighter: '战士',
-    shooter: '射手',
-    rider: '骑士',
+    fighter: '近战兵',
+    shooter: '射击兵',
+    rider: '骑乘兵',
     troop: '部队',
     allUnit: '战力优先',
     hint: '增加棋子可获得更多选择',
-    none: '未找到配置方案。\n请增加棋子数量。',
-    err: '发生错误，请重试。',
+    none: '未找到可配置方案\n请增加棋子数量',
+    err: '发生错误，请重试',
     share: '分享',
-    discord_copy: '复制到 Discord',
+    discord_copy: '复制到Discord',
     copied: '已复制到剪贴板',
+    computing: '计算中...',
+    loading_wasm: '加载求解器...',
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор навыков',
@@ -76,7 +82,7 @@ const STRINGS = {
     unitPref: 'Тип войска',
     unitHint: 'Выберите тип для ускорения расчёта',
     search: 'Найти оптимум',
-    found: 'вариант(ов) найдено',
+    found: 'вариантов найдено',
     of: '/',
     power: 'Рост силы',
     status: 'Активных статов',
@@ -86,15 +92,155 @@ const STRINGS = {
     troop: 'Отряд',
     allUnit: 'Макс. сила',
     hint: 'Больше фигур — больше вариантов',
-    none: 'Варианты не найдены.\nДобавьте больше фигур.',
+    none: 'Вариантов не найдено\nДобавьте больше фигур.',
     err: 'Произошла ошибка. Попробуйте снова.',
     share: 'Поделиться',
     discord_copy: 'Скопировать для Discord',
     copied: 'Скопировано в буфер обмена',
+    computing: 'Вычисление...',
+    loading_wasm: 'Загрузка решателя...',
   },
 }
 
-const API_URL = 'https://puzzle-solver-api.onrender.com'
+// ============================================================
+// ゲームデータ
+// ============================================================
+const BUFFS = {
+  1:  ['S','HP',  10,2000], 2:  ['F','HP',  10,2000], 3:  ['R','HP',  10,2000],
+  4:  ['部隊','DEF', 5,2000], 5:  ['部隊','HP',  5,2000], 6:  ['S','DEF',10,2000],
+  7:  ['F','DEF',10,2000],  8:  ['R','DEF',10,2000],  9:  ['部隊','DEF', 5,2000],
+  10: ['部隊','HP',  5,2000], 11: ['S','ATK',20,5000], 12: ['F','ATK',20,5000],
+  13: ['R','ATK',20,5000], 14: ['部隊','DEF',20,5000], 15: ['部隊','HP', 20,5000],
+  16: ['S','ATK',20,5000], 17: ['F','ATK',20,5000],  18: ['R','ATK',20,5000],
+  19: ['部隊','DEF',20,5000], 20: ['部隊','HP', 20,5000],
+}
+
+const UNITS_CFG = {
+  fighter: { best4:[12,17], yp4:[14,19,15,20], rest4:[11,16,13,18], self:'F', ally:'S' },
+  shooter: { best4:[11,16], yp4:[14,19,15,20], rest4:[12,17,13,18], self:'S', ally:'R' },
+  rider:   { best4:[13,18], yp4:[14,19,15,20], rest4:[12,17,11,16], self:'R', ally:'F' },
+}
+
+const UNIT_TARGETS = {
+  fighter: ['fighter'],
+  shooter: ['shooter'],
+  rider:   ['rider'],
+  all:     ['fighter','shooter','rider'],
+}
+
+const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
+
+const UNIT_LABEL = { fighter:'ファイター', shooter:'シューター', rider:'ライダー' }
+
+// ============================================================
+// ゲームロジック（JS版）
+// ============================================================
+function buffPriorityScore(pid, selfKey, allyKey) {
+  const [unitType, stat, pct] = BUFFS[pid]
+  const statW = { ATK:3, DEF:2, HP:1 }[stat]
+  let unitW = 0
+  if (unitType === selfKey) unitW = 4
+  else if (unitType === '部隊') unitW = 2
+  else if (unitType === allyKey) unitW = 1
+  return unitW * statW * pct
+}
+
+function getPidOrder(unit) {
+  const cfg = UNITS_CFG[unit]
+  const all3 = Array.from({length:10}, (_,i) => i+1)
+    .sort((a,b) => buffPriorityScore(b, cfg.self, cfg.ally) - buffPriorityScore(a, cfg.self, cfg.ally))
+  return [...cfg.best4, ...cfg.yp4, ...cfg.rest4, ...all3]
+}
+
+function convertField(field) {
+  return field.map(c => COLOR_MAP[c] ?? COLOR_MAP[String(c)] ?? 'empty')
+}
+
+function calcBuffs(patterns) {
+  const result = {
+    F:{ATK:0,DEF:0,HP:0}, S:{ATK:0,DEF:0,HP:0},
+    R:{ATK:0,DEF:0,HP:0}, '部隊':{ATK:0,DEF:0,HP:0}
+  }
+  for (const p of patterns) {
+    if (BUFFS[p]) {
+      const [unit, stat, val] = BUFFS[p]
+      result[unit][stat] += val
+    }
+  }
+  return result
+}
+
+function mergeBuffs(b1, b2) {
+  const result = {}
+  for (const u of ['F','S','R','部隊']) {
+    result[u] = {}
+    for (const s of ['ATK','DEF','HP']) {
+      result[u][s] = (b1[u]?.[s]||0) + (b2[u]?.[s]||0)
+    }
+  }
+  return result
+}
+
+// ============================================================
+// WASMラッパー
+// ============================================================
+function wasmSetupUnit(M, unit) {
+  const cfg = UNITS_CFG[unit]
+  const order = getPidOrder(unit)
+  const power = [0, ...Array.from({length:20}, (_,i) => BUFFS[i+1][3])]
+  const b4 = cfg.best4
+
+  const orderPtr = M._malloc(20 * 4)
+  const powerPtr = M._malloc(21 * 4)
+  const b4Ptr    = M._malloc(b4.length * 4)
+
+  for (let i = 0; i < 20; i++) M.setValue(orderPtr + i*4, order[i], 'i32')
+  for (let i = 0; i < 21; i++) M.setValue(powerPtr + i*4, power[i], 'i32')
+  for (let i = 0; i < b4.length; i++) M.setValue(b4Ptr + i*4, b4[i], 'i32')
+
+  M._setup_unit(orderPtr, powerPtr, b4Ptr, b4.length)
+
+  M._free(orderPtr)
+  M._free(powerPtr)
+  M._free(b4Ptr)
+}
+
+function wasmRunSolver(M, unit, hand, onLog) {
+  // hand: [red, blue, green, purple, gold]
+  wasmSetupUnit(M, unit)
+
+  let cbPtr = 0
+  if (onLog) {
+    cbPtr = M.addFunction((b4, yp4, power, nb) => {
+      onLog(b4, yp4, power, nb)
+    }, 'viiii')
+    M._set_log_callback(cbPtr)
+  }
+
+  const handPtr = M._malloc(5 * 4)
+  const resPtr  = M._malloc(60 * 4)
+
+  for (let i = 0; i < 5; i++) M.setValue(handPtr + i*4, hand[i], 'i32')
+  M._run_solve(handPtr, resPtr)
+
+  if (cbPtr) {
+    M._set_log_callback(0)
+    M.removeFunction(cbPtr)
+  }
+
+  const power  = M.getValue(resPtr + 2*4, 'i32')
+  const nb     = M.getValue(resPtr + 3*4, 'i32')
+  const npat   = M.getValue(resPtr + 4*4, 'i32')
+  const field  = []
+  for (let i = 0; i < 35; i++) field.push(M.getValue(resPtr + (5+i)*4, 'i32'))
+  const patterns = []
+  for (let i = 0; i < npat; i++) patterns.push(M.getValue(resPtr + (5+35+i)*4, 'i32'))
+
+  M._free(handPtr)
+  M._free(resPtr)
+
+  return { power, status_count: nb, field, patterns }
+}
 
 // ============================================================
 // シェアテキスト生成
@@ -103,12 +249,12 @@ function buildShareText(pattern, t) {
   const b = pattern.buffs
   const lines = ['F','S','R','部隊'].map(key => {
     const label = { F: t.fighter, S: t.shooter, R: t.rider, '部隊': t.troop }[key]
-    const parts = ['ATK', 'DEF', 'HP']
+    const parts = ['ATK','DEF','HP']
       .filter(s => (b[key]?.[s] ?? 0) > 0)
       .map(s => `${s}+${b[key][s]}%`)
     return parts.length ? `${label}: ${parts.join(' / ')}` : null
   }).filter(Boolean)
-  return `【パズル＆サバイバル 英雄特技】\n戦力+${pattern.power.toLocaleString()} / 有効ステータス${pattern.status_count}\n${lines.join('\n')}\n無料最適化ツール👇\n${TOOL_URL}`
+  return `【パズル&サバイバル 英雄特技】\n戦力+${pattern.power.toLocaleString()} / 有効ステータス${pattern.status_count}\n${lines.join('\n')}\n無料最適化ツール🔥\n${TOOL_URL}`
 }
 
 // ============================================================
@@ -161,22 +307,17 @@ function ShareButtons({ pattern, t }) {
 }
 
 // ============================================================
-// ローディングログ（リアルタイムSSE）
+// ローディングログ
 // ============================================================
 function LoadingLog({ logs }) {
   const bottomRef = useRef(null)
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [logs])
-
   return (
     <div className="loading-log">
       {logs.map((line, i) => (
-        <div
-          key={i}
-          className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}
-        >
+        <div key={i} className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}>
           {line}
         </div>
       ))}
@@ -212,10 +353,10 @@ function FieldGrid({ field, label }) {
 // ============================================================
 function BuffTable({ buffs, t }) {
   const units = [
-    { key: 'F',    label: t.fighter },
-    { key: 'S',    label: t.shooter },
-    { key: 'R',    label: t.rider   },
-    { key: '部隊', label: t.troop   },
+    { key: 'F',     label: t.fighter },
+    { key: 'S',     label: t.shooter },
+    { key: 'R',     label: t.rider   },
+    { key: '部隊',  label: t.troop   },
   ]
   return (
     <table className="buff-table">
@@ -226,7 +367,7 @@ function BuffTable({ buffs, t }) {
         {units.map(({ key, label }) => (
           <tr key={key}>
             <td>{label}</td>
-            {['ATK', 'DEF', 'HP'].map(s => {
+            {['ATK','DEF','HP'].map(s => {
               const val = buffs[key]?.[s] ?? 0
               return <td key={s} className={val === 0 ? 'buff-zero' : ''}>{val === 0 ? '—' : `+${val}%`}</td>
             })}
@@ -238,7 +379,7 @@ function BuffTable({ buffs, t }) {
 }
 
 // ============================================================
-// ステータス＋シェア
+// スタッツ＋シェア
 // ============================================================
 function StatsPanel({ pattern, t }) {
   return (
@@ -264,7 +405,7 @@ function Carousel({ patterns, t }) {
   return (
     <>
       <div className="pattern-msg">
-        <span>{total}</span> {t.found}（{current + 1} {t.of} {total}）
+        <span>{total}</span> {t.found}・{current + 1} {t.of} {total}
       </div>
       <div className="carousel-wrap">
         {p.fields.map((f, i) => (
@@ -274,13 +415,13 @@ function Carousel({ patterns, t }) {
           </div>
         ))}
         <div className="nav-row">
-          <button className="nav-btn" onClick={() => go(current - 1)}>←</button>
+          <button className="nav-btn" onClick={() => go(current - 1)}>‹</button>
           <div className="dots">
             {patterns.map((_, i) => (
               <button key={i} className={`dot${i === current ? ' active' : ''}`} onClick={() => go(i)} />
             ))}
           </div>
-          <button className="nav-btn" onClick={() => go(current + 1)}>→</button>
+          <button className="nav-btn" onClick={() => go(current + 1)}>›</button>
         </div>
         <StatsPanel pattern={p} t={t} />
       </div>
@@ -322,67 +463,142 @@ function UnitSelector({ value, onChange, t }) {
 // ============================================================
 export default function App() {
   const [lang, setLang] = useState('ja')
-  const [pieces, setPieces] = useState({ green: 8, blue: 2, purple: 8, gold: 7, red: 8 })
+  const [pieces, setPieces] = useState({ green:8, blue:2, purple:8, gold:7, red:8 })
   const [unitPref, setUnitPref] = useState('fighter')
-  const [status, setStatus] = useState('idle')
+  const [status, setStatus] = useState('idle')   // idle / loading / done / error
   const [result, setResult] = useState(null)
   const [logs, setLogs] = useState([])
-  const esRef = useRef(null)
+  const [wasmReady, setWasmReady] = useState(false)
+  const wasmRef = useRef(null)
   const t = STRINGS[lang]
+
+  // WASMロード
+  useEffect(() => {
+    window.Module = {
+      onRuntimeInitialized() {
+        wasmRef.current = window.Module
+        setWasmReady(true)
+      }
+    }
+    const script = document.createElement('script')
+    script.src = '/solver.js'
+    script.onerror = () => console.error('solver.js のロードに失敗しました')
+    document.body.appendChild(script)
+  }, [])
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
 
   const handleSolve = () => {
-    // 前回のSSE接続を閉じる
-    if (esRef.current) {
-      esRef.current.close()
-      esRef.current = null
-    }
+    if (!wasmRef.current) return
 
     setStatus('loading')
     setResult(null)
     setLogs([])
 
-    const params = new URLSearchParams({
-      green:     pieces.green,
-      blue:      pieces.blue,
-      purple:    pieces.purple,
-      gold:      pieces.gold,
-      red:       pieces.red,
-      unit_pref: unitPref,
-    })
+    // React に loading 状態を描画させてから計算開始
+    setTimeout(() => {
+      try {
+        const M = wasmRef.current
+        // C側の hand 順: [red, blue, green, purple, gold]
+        const hand = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
+        const total = hand.reduce((a,b) => a+b, 0)
+        const targets = UNIT_TARGETS[unitPref] || ['fighter','shooter','rider']
+        const collectedLogs = []
 
-    const es = new EventSource(`${API_URL}/solve/stream?${params}`)
-    esRef.current = es
-
-    es.onmessage = (e) => {
-      const data = e.data
-
-      if (data.startsWith('[RESULT]')) {
-        // 最終結果
-        try {
-          const json = JSON.parse(data.slice(8))
-          setResult(json)
-        } catch {
-          setStatus('error')
+        const onLog = (b4, yp4, power, nb) => {
+          collectedLogs.push(`[best]  power=${power.toLocaleString()}  b4=${b4}  yp4=${yp4}  有効=${nb}`)
         }
-      } else if (data === '[END]') {
-        es.close()
-        esRef.current = null
-        setStatus('done')
-      } else {
-        // ログ行を追加
-        setLogs(prev => [...prev, data])
-      }
-    }
 
-    es.onerror = () => {
-      es.close()
-      esRef.current = null
-      setLogs(prev => [...prev, '[error] 接続エラーが発生しました'])
-      setStatus('error')
-    }
+        let patterns = []
+
+        if (total < 30) {
+          // ── 1フィールド ──
+          const candidates = []
+          for (const unit of targets) {
+            const label = UNIT_LABEL[unit] || unit
+            collectedLogs.push(`[特技1] ${label} で計算中...`)
+            const r = wasmRunSolver(M, unit, hand, onLog)
+            if (r.power > 0) {
+              collectedLogs.push(`[特技1] ${label} 完了: power=${r.power.toLocaleString()}  有効=${r.status_count}`)
+              candidates.push({
+                power: r.power,
+                status_count: r.status_count,
+                fields: [{ label:'特技1', field: convertField(r.field) }],
+                buffs: calcBuffs(r.patterns),
+              })
+            } else {
+              collectedLogs.push(`[特技1] ${label} → 配置なし`)
+            }
+          }
+          candidates.sort((a,b) => b.power - a.power)
+          const seen = new Set()
+          for (const c of candidates) {
+            const sig = JSON.stringify(c.fields[0].field)
+            if (!seen.has(sig)) { seen.add(sig); patterns.push(c) }
+          }
+
+        } else {
+          // ── 2フィールド ──
+          let bestUnit = null, bestR1 = null
+          for (const unit of targets) {
+            const label = UNIT_LABEL[unit] || unit
+            collectedLogs.push(`[特技1] ${label} で計算中...`)
+            const r = wasmRunSolver(M, unit, hand, onLog)
+            if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
+            if (r.power > 0) {
+              collectedLogs.push(`[特技1] ${label} 完了: power=${r.power.toLocaleString()}  有効=${r.status_count}`)
+            } else {
+              collectedLogs.push(`[特技1] ${label} → 配置なし`)
+            }
+          }
+
+          if (bestR1 && bestR1.power > 0) {
+            const bestLabel = UNIT_LABEL[bestUnit] || bestUnit
+            collectedLogs.push(`[特技1] 採用: ${bestLabel}  power=${bestR1.power.toLocaleString()}`)
+
+            const used = [0,0,0,0,0]
+            for (const c of bestR1.field) if (c >= 0) used[c]++
+            const remaining = hand.map((h,i) => h - used[i])
+
+            collectedLogs.push(`[特技2] 残り駒: 赤=${remaining[0]} 青=${remaining[1]} 緑=${remaining[2]} 紫=${remaining[3]} 金=${remaining[4]}`)
+            collectedLogs.push(`[特技2] ${bestLabel} で計算中...`)
+
+            const r2 = wasmRunSolver(M, bestUnit, remaining, onLog)
+
+            if (r2.power === 0) {
+              collectedLogs.push(`[特技2] 配置なし → 特技1のみ採用`)
+              patterns = [{
+                power: bestR1.power,
+                status_count: bestR1.status_count,
+                fields: [{ label:'特技1', field: convertField(bestR1.field) }],
+                buffs: calcBuffs(bestR1.patterns),
+              }]
+            } else {
+              const totalPower = bestR1.power + r2.power
+              collectedLogs.push(`[特技2] 完了: power=${r2.power.toLocaleString()}  有効=${r2.status_count}`)
+              collectedLogs.push(`[完了]  合計戦力UP = +${totalPower.toLocaleString()}`)
+              patterns = [{
+                power: totalPower,
+                status_count: bestR1.status_count + r2.status_count,
+                fields: [
+                  { label:'特技1', field: convertField(bestR1.field) },
+                  { label:'特技2', field: convertField(r2.field) },
+                ],
+                buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
+              }]
+            }
+          }
+        }
+
+        setLogs(collectedLogs)
+        setResult({ total: patterns.length, patterns: patterns.slice(0,5) })
+        setStatus('done')
+      } catch (e) {
+        setLogs([`[error] ${e.message}`])
+        setStatus('error')
+      }
+    }, 50)
   }
 
   return (
@@ -418,8 +634,12 @@ export default function App() {
         <UnitSelector value={unitPref} onChange={setUnitPref} t={t} />
 
         <div className="search-btn-wrap">
-          <button className="search-btn" onClick={handleSolve} disabled={status === 'loading'}>
-            {t.search}
+          <button
+            className="search-btn"
+            onClick={handleSolve}
+            disabled={status === 'loading' || !wasmReady}
+          >
+            {!wasmReady ? t.loading_wasm : status === 'loading' ? t.computing : t.search}
           </button>
         </div>
       </div>
@@ -427,10 +647,15 @@ export default function App() {
       {/* 広告スペース */}
       <div className="ad-space" />
 
-      {/* ログ表示（計算中も完了後も表示し続ける） */}
+      {/* ログ表示 */}
       {logs.length > 0 && <LoadingLog logs={logs} />}
 
-      {status === 'error' && logs.length === 0 && <div className="no-result">{t.err}</div>}
+      {status === 'loading' && logs.length === 0 && (
+        <div className="no-result">{t.computing}</div>
+      )}
+
+      {status === 'error' && <div className="no-result">{t.err}</div>}
+
       {status === 'done' && result && (
         result.total === 0
           ? <div className="no-result">{t.none}</div>
