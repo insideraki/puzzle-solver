@@ -10,7 +10,7 @@ const STRINGS = {
   ru: { title: 'Puzzle & Survival\nОптимизатор навыков', chest: 'Шахматные фигуры', search: 'Найти оптимум', loading: 'Поиск...', found: 'вариант(ов) найдено', of: '/', power: 'Рост силы', status: 'Активных статов', fighter: 'Боец', shooter: 'Стрелок', rider: 'Всадник', troop: 'Отряд', hint: 'Больше фигур — больше вариантов', none: 'Варианты не найдены.\nДобавьте больше фигур.', err: 'Произошла ошибка. Попробуйте снова.', share: 'Поделиться', discord_copy: 'Скопировать для Discord', copied: 'Скопировано в буфер обмена' },
 }
 
-const API_URL = null // 本番: 'https://your-app.onrender.com'
+const API_URL = 'https://puzzle-solver-api.onrender.com'
 
 const F1 = ['blue','blue','blue','blue','gold','gold','purple','blue','green','green','green','green','gold','purple','blue','green','red','green','empty','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
 const F2 = ['red','red','red','red','gold','gold','purple','blue','green','red','green','green','gold','purple','blue','green','red','green','blue','gold','purple','blue','green','gold','gold','gold','gold','purple','empty','green','purple','purple','purple','purple','empty']
