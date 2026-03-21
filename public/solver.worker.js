@@ -185,7 +185,6 @@ function wasmRunSolver(M, unit, hand, onLog) {
 // 1兵種分の計算（1フィールドまたは2フィールド）
 // ============================================================
 function solveUnit(M, unit, hand, total) {
-  const label    = S.unit[unit] || unit
   if (total < 30) {
     // ── 1フィールド ──
     const r = wasmRunSolver(M, unit, hand, null)
