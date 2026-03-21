@@ -360,7 +360,7 @@ export default function App() {
 
   // ── Worker生成 ──
   const createWorker = useCallback(() => {
-    const w = new Worker(new URL('./solver.worker.js', import.meta.url))
+    const w = new Worker('/solver.worker.js')
     w.onmessage = (e) => {
       switch (e.data.type) {
         case 'ready':
