@@ -208,7 +208,7 @@ self.onmessage = (e) => {
       log(S.best(b4, yp4, power.toLocaleString(), nb))
     }
 
-    {
+    if (total < 30) {
       // ── 常に2フィールド計算（特技2が組めない場合は特技1のみ） ──
       let bestUnit = null, bestR1 = null
       for (const unit of targets) {
