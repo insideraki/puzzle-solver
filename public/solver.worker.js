@@ -208,34 +208,8 @@ self.onmessage = (e) => {
       log(S.best(b4, yp4, power.toLocaleString(), nb))
     }
 
-    if (total < 30) {
-      // ── 1フィールド ──
-      const candidates = []
-      for (const unit of targets) {
-        const label = S.unit[unit] || unit
-        log(S.skill1_start(label))
-        const r = wasmRunSolver(M, unit, hand, makeOnLog())
-        if (r.power > 0) {
-          log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
-          candidates.push({
-            power:        r.power,
-            status_count: r.status_count,
-            fields:       [{ key:'skill1', field: convertField(r.field) }],
-            buffs:        calcBuffs(r.patterns),
-          })
-        } else {
-          log(S.skill1_none(label))
-        }
-      }
-      candidates.sort((a,b) => b.power - a.power)
-      const seen = new Set()
-      for (const c of candidates) {
-        const sig = JSON.stringify(c.fields[0].field)
-        if (!seen.has(sig)) { seen.add(sig); patterns.push(c) }
-      }
-
-    } else {
-      // ── 2フィールド ──
+    {
+      // ── 常に2フィールド計算（特技2が組めない場合は特技1のみ） ──
       let bestUnit = null, bestR1 = null
       for (const unit of targets) {
         const label = S.unit[unit] || unit
