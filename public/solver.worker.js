@@ -184,21 +184,14 @@ function wasmRunSolver(M, unit, hand, onLog) {
 // ============================================================
 // 1兵種分の計算（1フィールドまたは2フィールド）
 // ============================================================
-function solveUnit(M, unit, hand, total, S, log) {
+function solveUnit(M, unit, hand, total) {
   const label    = S.unit[unit] || unit
-  const makeOnLog = () => (b4, yp4, power, nb) => {
-    log(S.best(b4, yp4, power.toLocaleString(), nb))
-  }
-
   if (total < 30) {
     // ── 1フィールド ──
-    log(S.skill1_start(label))
-    const r = wasmRunSolver(M, unit, hand, makeOnLog())
+    const r = wasmRunSolver(M, unit, hand, null)
     if (r.power === 0) {
-      log(S.skill1_none(label))
       return null
     }
-    log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
     return {
       unit,
       power:        r.power,
@@ -209,26 +202,17 @@ function solveUnit(M, unit, hand, total, S, log) {
 
   } else {
     // ── 2フィールド ──
-    log(S.skill1_start(label))
-    const r1 = wasmRunSolver(M, unit, hand, makeOnLog())
+    const r1 = wasmRunSolver(M, unit, hand, null)
     if (r1.power === 0) {
-      log(S.skill1_none(label))
       return null
     }
-    log(S.skill1_done(label, r1.power.toLocaleString(), r1.status_count))
-    log(S.skill1_adopt(label, r1.power.toLocaleString()))
-
     const used      = [0,0,0,0,0]
     for (const c of r1.field) if (c >= 0) used[c]++
     const remaining = hand.map((h,i) => h - used[i])
 
-    log(S.skill2_rest(remaining))
-    log(S.skill2_start(label))
-
-    const r2 = wasmRunSolver(M, unit, remaining, makeOnLog())
+    const r2 = wasmRunSolver(M, unit, remaining, null)
 
     if (r2.power === 0) {
-      log(S.skill2_none())
       return {
         unit,
         power:        r1.power,
@@ -239,8 +223,6 @@ function solveUnit(M, unit, hand, total, S, log) {
     }
 
     const totalPower = r1.power + r2.power
-    log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
-    log(S.total(totalPower.toLocaleString()))
     return {
       unit,
       power:        totalPower,
@@ -273,14 +255,11 @@ importScripts('/solver.js')
 self.onmessage = (e) => {
   if (e.data.type !== 'solve') return
 
-  const { hand, total, lang } = e.data   // targetsは廃止・常に3兵種
-  const S   = LOG_STRINGS[lang] ?? LOG_STRINGS.ja
-  const log = (msg) => self.postMessage({ type: 'log', data: msg })
-
+  const { hand, total } = e.data
   try {
     const units = []
     for (const unit of ALL_UNITS) {
-      const result = solveUnit(M, unit, hand, total, S, log)
+      const result = solveUnit(M, unit, hand, total)
       if (result) units.push(result)
     }
     self.postMessage({ type: 'result', data: { units } })
