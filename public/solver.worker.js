@@ -156,6 +156,8 @@ function wasmSetupUnit(M, unit) {
 function wasmRunSolver(M, unit, hand, onLog) {
   wasmSetupUnit(M, unit)
 
+  // 常にコールバックをクリア（staleポインタ対策）
+  M._set_log_callback(0)
   let cbPtr = 0
   if (onLog) {
     cbPtr = M.addFunction((b4, yp4, power, nb) => { onLog(b4, yp4, power, nb) }, 'viiii')
