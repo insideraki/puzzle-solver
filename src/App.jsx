@@ -18,6 +18,7 @@ const STRINGS = {
     troop: '部隊',
     skill1: '特技1',
     skill2: '特技2',
+    result_count: (n) => `${n}通りの配置が見つかりました`,
     hint: 'チェスを増やすとさらに選択肢が広がります',
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
     err: 'エラーが発生しました。もう一度試してください。',
@@ -42,6 +43,7 @@ const STRINGS = {
     troop: 'Troop',
     skill1: 'Skill 1',
     skill2: 'Skill 2',
+    result_count: (n) => `${n} pattern(s) found`,
     hint: 'More pieces = more options',
     none: 'No patterns found.\nTry adding more pieces.',
     err: 'An error occurred. Please try again.',
@@ -66,6 +68,7 @@ const STRINGS = {
     troop: '部队',
     skill1: '技能1',
     skill2: '技能2',
+    result_count: (n) => `找到 ${n} 种配置`,
     hint: '增加棋子可获得更多选择',
     none: '未找到可配置方案\n请增加棋子数量',
     err: '发生错误，请重试',
@@ -90,6 +93,7 @@ const STRINGS = {
     troop: 'Отряд',
     skill1: 'Навык 1',
     skill2: 'Навык 2',
+    result_count: (n) => `Найдено вариантов: ${n}`,
     hint: 'Больше фигур — больше вариантов',
     none: 'Вариантов не найдено\nДобавьте больше фигур.',
     err: 'Произошла ошибка. Попробуйте снова.',
@@ -329,6 +333,15 @@ export default function App() {
   const workerRef = useRef(null)
   const t = STRINGS[lang]
 
+  const logBufferRef = useRef([])
+  const logTimerRef  = useRef(null)
+
+  const flushLogs = useCallback(() => {
+    if (logBufferRef.current.length === 0) return
+    const batch = logBufferRef.current.splice(0)
+    setLogs(prev => [...prev, ...batch])
+  }, [])
+
   // ── Worker生成 ──
   const createWorker = useCallback(() => {
     const w = new Worker('/solver.worker.js')
@@ -338,20 +351,33 @@ export default function App() {
           setWasmReady(true)
           break
         case 'log':
-          setLogs(prev => [...prev, e.data.data])
+          // 100msバッチでまとめてsetState → 再レンダリング回数を削減
+          logBufferRef.current.push(e.data.data)
+          if (!logTimerRef.current) {
+            logTimerRef.current = setTimeout(() => {
+              logTimerRef.current = null
+              flushLogs()
+            }, 100)
+          }
           break
         case 'result':
+          clearTimeout(logTimerRef.current)
+          logTimerRef.current = null
+          flushLogs()
           setResult(e.data.data)
           setStatus('done')
           break
         case 'error':
+          clearTimeout(logTimerRef.current)
+          logTimerRef.current = null
+          flushLogs()
           setLogs(prev => [...prev, `[error] ${e.data.data}`])
           setStatus('error')
           break
       }
     }
     workerRef.current = w
-  }, [])
+  }, [flushLogs])
 
   useEffect(() => {
     createWorker()
@@ -418,7 +444,7 @@ export default function App() {
 
         <div className="search-btn-wrap">
           {status === 'loading' ? (
-            <button className="cancel-btn" onClick={handleCancel}>
+            <button className="search-btn" onClick={handleCancel}>
               ⏹ {t.cancel}
             </button>
           ) : (
@@ -453,9 +479,11 @@ export default function App() {
           seen.add(sig)
           return true
         })
-        return deduped.length === 0
-          ? <div className="no-result">{t.none}</div>
-          : <Carousel units={deduped} t={t} />
+        if (deduped.length === 0) return <div className="no-result">{t.none}</div>
+        return <>
+          <div className="pattern-msg">{t.result_count(deduped.length)}</div>
+          <Carousel units={deduped} t={t} />
+        </>
       })()}
     </div>
   )
