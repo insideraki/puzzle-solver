@@ -120,6 +120,7 @@ const BUFFS = {
 }
 
 const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
+const ALL_UNITS = ['fighter', 'shooter', 'rider']
 
 
 // ============================================================
@@ -322,57 +323,95 @@ export default function App() {
   const [pieces, setPieces]       = useState({ green:0, blue:0, purple:0, gold:0, red:0 })
   const [status, setStatus]       = useState('idle')   // idle / loading / done / error
   const [result, setResult]       = useState(null)     // { units: [...] }
-  const [wasmReady, setWasmReady] = useState(false)
-  const workerRef = useRef(null)
+  const [readyCount, setReadyCount] = useState(0)
+  const workersRef  = useRef([])   // 3つのWorkerを常駐
+  const pendingRef  = useRef([])   // 結果収集用
   const t = STRINGS[lang]
 
-  // ── Worker生成 ──
-  const createWorker = useCallback(() => {
-    const w = new Worker('/solver.worker.js')
-    w.onmessage = (e) => {
-      switch (e.data.type) {
-        case 'ready':
-          setWasmReady(true)
-          break
-        case 'result':
-          setResult(e.data.data)
-          setStatus('done')
-          break
-        case 'error':
-          setStatus('error')
-          break
-      }
-    }
-    workerRef.current = w
-  }, [])
+  const wasmReady = readyCount >= ALL_UNITS.length
 
+  // ── Worker群を生成（マウント時のみ） ──
   useEffect(() => {
-    createWorker()
-    return () => workerRef.current?.terminate()
-  }, [createWorker])
+    const workers = ALL_UNITS.map((unit) => {
+      const w = new Worker('/solver.worker.js')
+      w.onmessage = (e) => {
+        switch (e.data.type) {
+          case 'ready':
+            setReadyCount(n => n + 1)
+            break
+          case 'result': {
+            const r = e.data.data  // null or unitResult
+            if (r) pendingRef.current.push(r)
+            // 3つ全部揃ったら表示
+            if (pendingRef.current.length === ALL_UNITS.length) {
+              setResult({ units: pendingRef.current })
+              setStatus('done')
+            }
+            break
+          }
+          case 'error':
+            setStatus('error')
+            break
+        }
+      }
+      return w
+    })
+    workersRef.current = workers
+    return () => workers.forEach(w => w.terminate())
+  }, [])
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
 
   // ── 計算開始 ──
   const handleSolve = () => {
-    if (!wasmReady || !workerRef.current) return
+    if (!wasmReady) return
     setStatus('loading')
     setResult(null)
+    pendingRef.current = []
 
     const hand  = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
     const total = hand.reduce((a,b) => a+b, 0)
 
-    // targetsは廃止。常に3兵種をworker側で計算
-    workerRef.current.postMessage({ type: 'solve', hand, total, lang })
+    // 3つのWorkerに各兵種を同時送信
+    ALL_UNITS.forEach((unit, i) => {
+      workersRef.current[i].postMessage({ type: 'solve', hand, total, unit })
+    })
   }
 
-  // ── 計算中止 ──
+  // ── 計算中止：Workerを再生成して即リセット ──
   const handleCancel = () => {
-    workerRef.current?.terminate()
-    setWasmReady(false)
+    workersRef.current.forEach(w => w.terminate())
+    workersRef.current = []
+    pendingRef.current = []
+    setReadyCount(0)
     setStatus('idle')
-    createWorker()
+    setResult(null)
+    // Worker再生成
+    const workers = ALL_UNITS.map((unit) => {
+      const w = new Worker('/solver.worker.js')
+      w.onmessage = (e) => {
+        switch (e.data.type) {
+          case 'ready':
+            setReadyCount(n => n + 1)
+            break
+          case 'result': {
+            const r = e.data.data
+            if (r) pendingRef.current.push(r)
+            if (pendingRef.current.length === ALL_UNITS.length) {
+              setResult({ units: pendingRef.current })
+              setStatus('done')
+            }
+            break
+          }
+          case 'error':
+            setStatus('error')
+            break
+        }
+      }
+      return w
+    })
+    workersRef.current = workers
   }
 
   return (
