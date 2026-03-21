@@ -1,63 +1,4 @@
 // solver.worker.js
-// WASMソルバーをWeb Workerで実行する
-
-// ============================================================
-// ログ文字列（多言語）
-// ============================================================
-const LOG_STRINGS = {
-  ja: {
-    unit: { fighter:'ファイター', shooter:'シューター', rider:'ライダー' },
-    skill1_start: (l)          => `[特技1] ${l} で計算中...`,
-    skill1_done:  (l,p,n)      => `[特技1] ${l} 完了: power=${p}  有効=${n}`,
-    skill1_none:  (l)          => `[特技1] ${l} → 配置なし`,
-    skill1_adopt: (l,p)        => `[特技1] 採用: ${l}  power=${p}`,
-    skill2_rest:  (r)          => `[特技2] 残り駒: 赤=${r[0]} 青=${r[1]} 緑=${r[2]} 紫=${r[3]} 金=${r[4]}`,
-    skill2_start: (l)          => `[特技2] ${l} で計算中...`,
-    skill2_none:  ()           => `[特技2] 配置なし → 特技1のみ採用`,
-    skill2_done:  (p,n)        => `[特技2] 完了: power=${p}  有効=${n}`,
-    total:        (p)          => `[完了]  合計戦力UP = +${p}`,
-    best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  有効=${n}`,
-  },
-  en: {
-    unit: { fighter:'Fighter', shooter:'Shooter', rider:'Rider' },
-    skill1_start: (l)          => `[Skill1] ${l}: computing...`,
-    skill1_done:  (l,p,n)      => `[Skill1] ${l} done: power=${p}  active=${n}`,
-    skill1_none:  (l)          => `[Skill1] ${l} → no placement`,
-    skill1_adopt: (l,p)        => `[Skill1] adopted: ${l}  power=${p}`,
-    skill2_rest:  (r)          => `[Skill2] remaining: red=${r[0]} blue=${r[1]} green=${r[2]} purple=${r[3]} gold=${r[4]}`,
-    skill2_start: (l)          => `[Skill2] ${l}: computing...`,
-    skill2_none:  ()           => `[Skill2] no placement → Skill1 only`,
-    skill2_done:  (p,n)        => `[Skill2] done: power=${p}  active=${n}`,
-    total:        (p)          => `[Done]  total power UP = +${p}`,
-    best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  active=${n}`,
-  },
-  zh: {
-    unit: { fighter:'近战兵', shooter:'射击兵', rider:'骑乘兵' },
-    skill1_start: (l)          => `[技能1] ${l}: 计算中...`,
-    skill1_done:  (l,p,n)      => `[技能1] ${l} 完成: power=${p}  有效=${n}`,
-    skill1_none:  (l)          => `[技能1] ${l} → 无配置`,
-    skill1_adopt: (l,p)        => `[技能1] 采用: ${l}  power=${p}`,
-    skill2_rest:  (r)          => `[技能2] 剩余: 红=${r[0]} 蓝=${r[1]} 绿=${r[2]} 紫=${r[3]} 金=${r[4]}`,
-    skill2_start: (l)          => `[技能2] ${l}: 计算中...`,
-    skill2_none:  ()           => `[技能2] 无配置 → 仅技能1`,
-    skill2_done:  (p,n)        => `[技能2] 完成: power=${p}  有效=${n}`,
-    total:        (p)          => `[完成]  总战力UP = +${p}`,
-    best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  有效=${n}`,
-  },
-  ru: {
-    unit: { fighter:'Боец', shooter:'Стрелок', rider:'Всадник' },
-    skill1_start: (l)          => `[Навык1] ${l}: вычисление...`,
-    skill1_done:  (l,p,n)      => `[Навык1] ${l} готово: сила=${p}  актив=${n}`,
-    skill1_none:  (l)          => `[Навык1] ${l} → нет размещения`,
-    skill1_adopt: (l,p)        => `[Навык1] принято: ${l}  сила=${p}`,
-    skill2_rest:  (r)          => `[Навык2] остаток: кр=${r[0]} си=${r[1]} зл=${r[2]} фи=${r[3]} зо=${r[4]}`,
-    skill2_start: (l)          => `[Навык2] ${l}: вычисление...`,
-    skill2_none:  ()           => `[Навык2] нет размещения → только навык1`,
-    skill2_done:  (p,n)        => `[Навык2] готово: сила=${p}  актив=${n}`,
-    total:        (p)          => `[Готово]  итого сила UP = +${p}`,
-    best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  актив=${n}`,
-  },
-}
 
 // ============================================================
 // ゲームデータ
@@ -77,8 +18,6 @@ const UNITS_CFG = {
   shooter:{ best4:[11,16], yp4:[14,19,15,20], rest4:[12,17,13,18], self:'S', ally:'R' },
   rider:  { best4:[13,18], yp4:[14,19,15,20], rest4:[12,17,11,16], self:'R', ally:'F' },
 }
-
-const ALL_UNITS = ['fighter', 'shooter', 'rider']
 
 const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
 
@@ -153,23 +92,14 @@ function wasmSetupUnit(M, unit) {
   M._free(orderPtr); M._free(powerPtr); M._free(b4Ptr)
 }
 
-function wasmRunSolver(M, unit, hand, onLog) {
+function wasmRunSolver(M, unit, hand) {
   wasmSetupUnit(M, unit)
-
-  // 常にコールバックをクリア（staleポインタ対策）
-  M._set_log_callback(0)
-  let cbPtr = 0
-  if (onLog) {
-    cbPtr = M.addFunction((b4, yp4, power, nb) => { onLog(b4, yp4, power, nb) }, 'viiii')
-    M._set_log_callback(cbPtr)
-  }
+  M._set_log_callback(0)   // staleポインタ対策
 
   const handPtr = M._malloc(5  * 4)
   const resPtr  = M._malloc(60 * 4)
   for (let i = 0; i < 5; i++) M.setValue(handPtr + i*4, hand[i], 'i32')
   M._run_solve(handPtr, resPtr)
-
-  if (cbPtr) { M._set_log_callback(0); M.removeFunction(cbPtr) }
 
   const power    = M.getValue(resPtr + 2*4, 'i32')
   const nb       = M.getValue(resPtr + 3*4, 'i32')
@@ -184,56 +114,63 @@ function wasmRunSolver(M, unit, hand, onLog) {
 }
 
 // ============================================================
-// 1兵種分の計算（1フィールドまたは2フィールド）
+// ソルバー本体（targets内の各兵種を計算してpatterns配列を返す）
 // ============================================================
-function solveUnit(M, unit, hand, total) {
+function solve(M, targets, hand, total) {
   if (total < 30) {
     // ── 1フィールド ──
-    const r = wasmRunSolver(M, unit, hand, null)
-    if (r.power === 0) {
-      return null
-    }
-    return {
-      unit,
-      power:        r.power,
-      status_count: r.status_count,
-      fields:       [{ key:'skill1', field: convertField(r.field) }],
-      buffs:        calcBuffs(r.patterns),
-    }
-
-  } else {
-    // ── 2フィールド ──
-    const r1 = wasmRunSolver(M, unit, hand, null)
-    if (r1.power === 0) {
-      return null
-    }
-    const used      = [0,0,0,0,0]
-    for (const c of r1.field) if (c >= 0) used[c]++
-    const remaining = hand.map((h,i) => h - used[i])
-
-    const r2 = wasmRunSolver(M, unit, remaining, null)
-
-    if (r2.power === 0) {
-      return {
-        unit,
-        power:        r1.power,
-        status_count: r1.status_count,
-        fields:       [{ key:'skill1', field: convertField(r1.field) }],
-        buffs:        calcBuffs(r1.patterns),
+    const candidates = []
+    for (const unit of targets) {
+      const r = wasmRunSolver(M, unit, hand)
+      if (r.power > 0) {
+        candidates.push({
+          power:        r.power,
+          status_count: r.status_count,
+          fields:       [{ key:'skill1', field: convertField(r.field) }],
+          buffs:        calcBuffs(r.patterns),
+        })
       }
     }
+    candidates.sort((a,b) => b.power - a.power)
+    const seen = new Set()
+    const patterns = []
+    for (const c of candidates) {
+      const sig = JSON.stringify(c.fields[0].field)
+      if (!seen.has(sig)) { seen.add(sig); patterns.push(c) }
+    }
+    return patterns
 
-    const totalPower = r1.power + r2.power
-    return {
-      unit,
-      power:        totalPower,
-      status_count: r1.status_count + r2.status_count,
+  } else {
+    // ── 2フィールド：最良兵種1つを採用 ──
+    let bestUnit = null, bestR1 = null
+    for (const unit of targets) {
+      const r = wasmRunSolver(M, unit, hand)
+      if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
+    }
+    if (!bestR1 || bestR1.power === 0) return []
+
+    const used      = [0,0,0,0,0]
+    for (const c of bestR1.field) if (c >= 0) used[c]++
+    const remaining = hand.map((h,i) => h - used[i])
+    const r2        = wasmRunSolver(M, bestUnit, remaining)
+
+    if (r2.power === 0) {
+      return [{
+        power:        bestR1.power,
+        status_count: bestR1.status_count,
+        fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
+        buffs:        calcBuffs(bestR1.patterns),
+      }]
+    }
+    return [{
+      power:        bestR1.power + r2.power,
+      status_count: bestR1.status_count + r2.status_count,
       fields: [
-        { key:'skill1', field: convertField(r1.field) },
+        { key:'skill1', field: convertField(bestR1.field) },
         { key:'skill2', field: convertField(r2.field) },
       ],
-      buffs: mergeBuffs(calcBuffs(r1.patterns), calcBuffs(r2.patterns)),
-    }
+      buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
+    }]
   }
 }
 
@@ -241,7 +178,6 @@ function solveUnit(M, unit, hand, total) {
 // WASMロード
 // ============================================================
 let M = null
-
 self.Module = {
   onRuntimeInitialized() {
     M = self.Module
@@ -251,16 +187,14 @@ self.Module = {
 importScripts('/solver.js')
 
 // ============================================================
-// メッセージ受信・ソルバー実行
+// メッセージ受信
 // ============================================================
 self.onmessage = (e) => {
   if (e.data.type !== 'solve') return
-
-  // unit を1つ受け取って1兵種だけ計算（並列化のため）
-  const { hand, total, unit } = e.data
+  const { hand, total, targets } = e.data
   try {
-    const result = solveUnit(M, unit, hand, total)
-    self.postMessage({ type: 'result', data: result })
+    const patterns = solve(M, targets, hand, total)
+    self.postMessage({ type: 'result', data: { patterns } })
   } catch (err) {
     self.postMessage({ type: 'error', data: err.message })
   }
