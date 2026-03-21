@@ -78,6 +78,8 @@ const UNITS_CFG = {
   rider:  { best4:[13,18], yp4:[14,19,15,20], rest4:[12,17,11,16], self:'R', ally:'F' },
 }
 
+const ALL_UNITS = ['fighter', 'shooter', 'rider']
+
 const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
 
 // ============================================================
@@ -180,6 +182,79 @@ function wasmRunSolver(M, unit, hand, onLog) {
 }
 
 // ============================================================
+// 1兵種分の計算（1フィールドまたは2フィールド）
+// ============================================================
+function solveUnit(M, unit, hand, total, S, log) {
+  const label    = S.unit[unit] || unit
+  const makeOnLog = () => (b4, yp4, power, nb) => {
+    log(S.best(b4, yp4, power.toLocaleString(), nb))
+  }
+
+  if (total < 30) {
+    // ── 1フィールド ──
+    log(S.skill1_start(label))
+    const r = wasmRunSolver(M, unit, hand, makeOnLog())
+    if (r.power === 0) {
+      log(S.skill1_none(label))
+      return null
+    }
+    log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
+    return {
+      unit,
+      power:        r.power,
+      status_count: r.status_count,
+      fields:       [{ key:'skill1', field: convertField(r.field) }],
+      buffs:        calcBuffs(r.patterns),
+    }
+
+  } else {
+    // ── 2フィールド ──
+    log(S.skill1_start(label))
+    const r1 = wasmRunSolver(M, unit, hand, makeOnLog())
+    if (r1.power === 0) {
+      log(S.skill1_none(label))
+      return null
+    }
+    log(S.skill1_done(label, r1.power.toLocaleString(), r1.status_count))
+    log(S.skill1_adopt(label, r1.power.toLocaleString()))
+
+    const used      = [0,0,0,0,0]
+    for (const c of r1.field) if (c >= 0) used[c]++
+    const remaining = hand.map((h,i) => h - used[i])
+
+    log(S.skill2_rest(remaining))
+    log(S.skill2_start(label))
+
+    const r2 = wasmRunSolver(M, unit, remaining, makeOnLog())
+
+    if (r2.power === 0) {
+      log(S.skill2_none())
+      return {
+        unit,
+        power:        r1.power,
+        status_count: r1.status_count,
+        fields:       [{ key:'skill1', field: convertField(r1.field) }],
+        buffs:        calcBuffs(r1.patterns),
+      }
+    }
+
+    const totalPower = r1.power + r2.power
+    log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
+    log(S.total(totalPower.toLocaleString()))
+    return {
+      unit,
+      power:        totalPower,
+      status_count: r1.status_count + r2.status_count,
+      fields: [
+        { key:'skill1', field: convertField(r1.field) },
+        { key:'skill2', field: convertField(r2.field) },
+      ],
+      buffs: mergeBuffs(calcBuffs(r1.patterns), calcBuffs(r2.patterns)),
+    }
+  }
+}
+
+// ============================================================
 // WASMロード
 // ============================================================
 let M = null
@@ -198,98 +273,17 @@ importScripts('/solver.js')
 self.onmessage = (e) => {
   if (e.data.type !== 'solve') return
 
-  const { hand, targets, total, lang } = e.data
+  const { hand, total, lang } = e.data   // targetsは廃止・常に3兵種
   const S   = LOG_STRINGS[lang] ?? LOG_STRINGS.ja
   const log = (msg) => self.postMessage({ type: 'log', data: msg })
 
   try {
-    let patterns = []
-
-    const makeOnLog = () => (b4, yp4, power, nb) => {
-      log(S.best(b4, yp4, power.toLocaleString(), nb))
+    const units = []
+    for (const unit of ALL_UNITS) {
+      const result = solveUnit(M, unit, hand, total, S, log)
+      if (result) units.push(result)
     }
-
-    if (total < 30) {
-      // ── 1フィールド ──
-      const candidates = []
-      for (const unit of targets) {
-        const label = S.unit[unit] || unit
-        log(S.skill1_start(label))
-        const r = wasmRunSolver(M, unit, hand, makeOnLog())
-        if (r.power > 0) {
-          log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
-          candidates.push({
-            power:        r.power,
-            status_count: r.status_count,
-            fields:       [{ label:'特技1', field: convertField(r.field) }],
-            buffs:        calcBuffs(r.patterns),
-          })
-        } else {
-          log(S.skill1_none(label))
-        }
-      }
-      candidates.sort((a,b) => b.power - a.power)
-      const seen = new Set()
-      for (const c of candidates) {
-        const sig = JSON.stringify(c.fields[0].field)
-        if (!seen.has(sig)) { seen.add(sig); patterns.push(c) }
-      }
-
-    } else {
-      // ── 2フィールド ──
-      let bestUnit = null, bestR1 = null
-      for (const unit of targets) {
-        const label = S.unit[unit] || unit
-        log(S.skill1_start(label))
-        const r = wasmRunSolver(M, unit, hand, makeOnLog())
-        if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
-        if (r.power > 0) {
-          log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
-        } else {
-          log(S.skill1_none(label))
-        }
-      }
-
-      if (bestR1 && bestR1.power > 0) {
-        const bestLabel = S.unit[bestUnit] || bestUnit
-        log(S.skill1_adopt(bestLabel, bestR1.power.toLocaleString()))
-
-        const used      = [0,0,0,0,0]
-        for (const c of bestR1.field) if (c >= 0) used[c]++
-        const remaining = hand.map((h,i) => h - used[i])
-
-        log(S.skill2_rest(remaining))
-        log(S.skill2_start(bestLabel))
-
-        const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
-
-        if (r2.power === 0) {
-          log(S.skill2_none())
-          patterns = [{
-            power:        bestR1.power,
-            status_count: bestR1.status_count,
-            fields:       [{ label:'特技1', field: convertField(bestR1.field) }],
-            buffs:        calcBuffs(bestR1.patterns),
-          }]
-        } else {
-          const totalPower = bestR1.power + r2.power
-          log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
-          log(S.total(totalPower.toLocaleString()))
-          patterns = [{
-            power:        totalPower,
-            status_count: bestR1.status_count + r2.status_count,
-            fields: [
-              { label:'特技1', field: convertField(bestR1.field) },
-              { label:'特技2', field: convertField(r2.field) },
-            ],
-            buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
-          }]
-        }
-      }
-    }
-
-    self.postMessage({ type: 'result', data: { total: patterns.length, patterns: patterns.slice(0,5) } })
-
+    self.postMessage({ type: 'result', data: { units } })
   } catch (err) {
     self.postMessage({ type: 'error', data: err.message })
   }
