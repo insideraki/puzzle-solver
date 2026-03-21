@@ -151,6 +151,75 @@ function wasmSetupUnit(M, unit) {
   M._free(orderPtr); M._free(powerPtr); M._free(b4Ptr)
 }
 
+function wasmRunSolverParallel(unit, hand) {
+  return new Promise((resolve) => {
+    wasmSetupUnit(M, unit)
+
+    const handPtr = M._malloc(5 * 4)
+    for (let i = 0; i < 5; i++) M.setValue(handPtr + i*4, hand[i], 'i32')
+    M._run_solve_begin(handPtr)
+    M._free(handPtr)
+
+    const nplFirst = M._get_npl_first()
+    const allJobs  = [-1, ...Array.from({length: nplFirst}, (_, i) => i)]
+
+    const NUM_WORKERS = 4
+    const workerJobs  = Array.from({length: NUM_WORKERS}, () => [])
+    allJobs.forEach((job, idx) => workerJobs[idx % NUM_WORKERS].push(job))
+
+    const cfg      = UNITS_CFG[unit]
+    const orderArr = getPidOrder(unit)
+    const powerArr = [0, ...Array.from({length:20}, (_, i) => BUFFS[i+1][3])]
+    const b4Arr    = cfg.best4
+
+    let completed   = 0
+    let bestResult  = null
+    const total     = NUM_WORKERS
+
+    function checkDone() {
+      completed++
+      if (completed === total) {
+        if (!bestResult) {
+          resolve({ power: 0, status_count: 0, field: Array(35).fill(-1), patterns: [] })
+        } else {
+          resolve({
+            power:        bestResult.power,
+            status_count: bestResult.nb,
+            field:        bestResult.field,
+            patterns:     bestResult.patterns,
+          })
+        }
+      }
+    }
+
+    function isBetter(r, best) {
+      if (!best) return true
+      if (r.b4   > best.b4)   return true
+      if (r.b4   < best.b4)   return false
+      if (r.yp4  > best.yp4)  return true
+      if (r.yp4  < best.yp4)  return false
+      if (r.power > best.power) return true
+      if (r.power < best.power) return false
+      return r.nb > best.nb
+    }
+
+    for (let w = 0; w < NUM_WORKERS; w++) {
+      if (workerJobs[w].length === 0) { checkDone(); continue }
+      const worker = new Worker('/sub.worker.js')
+      worker.onmessage = (e) => {
+        if (e.data.type === 'ready') {
+          worker.postMessage({ type: 'run', jobs: workerJobs[w], handArr: hand, orderArr, powerArr, b4Arr })
+        } else if (e.data.type === 'done') {
+          const r = e.data.result
+          if (isBetter(r, bestResult)) bestResult = r
+          worker.terminate()
+          checkDone()
+        }
+      }
+    }
+  })
+}
+
 function wasmRunSolver(M, unit, hand, onLog) {
   wasmSetupUnit(M, unit)
 
@@ -195,7 +264,7 @@ importScripts('/solver.js')
 // ============================================================
 // メッセージ受信・ソルバー実行
 // ============================================================
-self.onmessage = (e) => {
+self.onmessage = async (e) => {
   if (e.data.type !== 'solve') return
 
   const { hand, targets, total, lang } = e.data
@@ -215,7 +284,7 @@ self.onmessage = (e) => {
       for (const unit of targets) {
         const label = S.unit[unit] || unit
         log(S.skill1_start(label))
-        const r = wasmRunSolver(M, unit, hand, makeOnLog())
+        const r = await wasmRunSolverParallel(unit, hand)
         if (r.power > 0) {
           log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
           candidates.push({
@@ -241,7 +310,7 @@ self.onmessage = (e) => {
       for (const unit of targets) {
         const label = S.unit[unit] || unit
         log(S.skill1_start(label))
-        const r = wasmRunSolver(M, unit, hand, makeOnLog())
+        const r = await wasmRunSolverParallel(unit, hand)
         if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
         if (r.power > 0) {
           log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
@@ -261,7 +330,7 @@ self.onmessage = (e) => {
         log(S.skill2_rest(remaining))
         log(S.skill2_start(bestLabel))
 
-        const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
+        const r2 = await wasmRunSolverParallel(bestUnit, remaining)
 
         if (r2.power === 0) {
           log(S.skill2_none())
