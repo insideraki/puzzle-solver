@@ -112,38 +112,40 @@ body {
 .search-btn:hover { background: #2a2210; }
 .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ---- ローディング ---- */
-.loading-wrap {
-  text-align: center;
-  padding: 40px 0;
-}
-.loading-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  max-width: 300px;
-  margin: 0 auto 16px;
-}
-.loading-cell {
-  aspect-ratio: 1;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 3px;
+/* ---- 計算中インジケーター ---- */
+.computing-indicator {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  padding: 32px;
 }
-.loading-cell.lit {
-  animation: pulse 0.4s ease-out forwards;
+
+.computing-dots {
+  display: flex;
+  gap: 8px;
 }
-@keyframes pulse {
-  0%   { background: #B79949; opacity: 1; }
-  100% { background: #2a2a1a; opacity: 0.6; }
+
+.computing-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #B79949;
+  animation: dot-bounce 1.2s infinite ease-in-out;
 }
-.loading-text {
+
+.computing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.computing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+  40%            { transform: scale(1.0); opacity: 1.0; }
+}
+
+.computing-label {
+  color: #666;
   font-size: 13px;
-  color: #888;
-  margin-top: 8px;
+  letter-spacing: 0.06em;
 }
 
 /* ---- 結果なし ---- */
@@ -153,6 +155,7 @@ body {
   color: #888;
   font-size: 14px;
   line-height: 1.8;
+  white-space: pre-line;
 }
 
 /* ---- パターンカウンター ---- */
@@ -315,6 +318,7 @@ body {
 .buff-table tr + tr td { border-top: 1px solid #1e1e1e; }
 .buff-zero { color: #333 !important; }
 
+/* ---- ヘッダー ---- */
 .header {
   display: flex;
   align-items: center;
@@ -341,14 +345,6 @@ body {
   flex-shrink: 0;
 }
 .lang-select:focus { outline: none; border-color: #B79949; }
-.no-result {
-  text-align: center;
-  padding: 32px 16px;
-  color: #888;
-  font-size: 14px;
-  line-height: 1.8;
-  white-space: pre-line;
-}
 
 /* ---- 広告スペース ---- */
 .ad-space {
@@ -402,14 +398,12 @@ body {
   color: #B79949;
 }
 
-
 /* ---- 兵種選択 ---- */
 .unit-selector-section {
   margin-top: 14px;
   border-top: 1px solid #1e1e1e;
   padding-top: 12px;
 }
-
 .unit-selector-row {
   display: flex;
   gap: 6px;
@@ -417,7 +411,6 @@ body {
   flex-wrap: wrap;
   margin-bottom: 6px;
 }
-
 .unit-btn {
   flex: 1;
   min-width: 70px;
@@ -437,7 +430,6 @@ body {
   border-color: #B79949;
   color: #d4b85a;
 }
-
 .unit-hint {
   font-size: 11px;
   color: #444;
@@ -456,18 +448,64 @@ body {
   line-height: 1.9;
   color: #666;
   min-height: 80px;
-  max-height: 220px;
+  max-height: 160px;
   overflow-y: auto;
 }
-
 .log-line { color: #555; }
 .log-line-new {
   color: #B79949;
   animation: fadeIn 0.3s ease-out;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ---- チェス使用数・残り数 ---- */
+.chess-usage {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0 8px;
+  border-bottom: 1px solid #1e1e1e;
+  margin-bottom: 10px;
+}
+.chess-usage-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.chest-icon-sm {
+  width: 32px;
+  height: 32px;
+  clip-path: polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chest-icon-inner-sm {
+  width: 84%;
+  height: 84%;
+  clip-path: polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);
+}
+.chest-icon-sm.green       { background: linear-gradient(145deg,#5aaa2a,#2a5510); }
+.chest-icon-sm.green .chest-icon-inner-sm { background: linear-gradient(145deg,#88e050,#4a8820); }
+.chest-icon-sm.blue        { background: linear-gradient(145deg,#2a98c0,#104860); }
+.chest-icon-sm.blue .chest-icon-inner-sm { background: linear-gradient(145deg,#50c8e8,#208898); }
+.chest-icon-sm.purple      { background: linear-gradient(145deg,#9830c0,#481060); }
+.chest-icon-sm.purple .chest-icon-inner-sm { background: linear-gradient(145deg,#c860e8,#7820a0); }
+.chest-icon-sm.gold        { background: linear-gradient(145deg,#c09020,#605010); }
+.chest-icon-sm.gold .chest-icon-inner-sm { background: linear-gradient(145deg,#f0c040,#a07820); }
+.chest-icon-sm.red         { background: linear-gradient(145deg,#c03030,#601818); }
+.chest-icon-sm.red .chest-icon-inner-sm { background: linear-gradient(145deg,#f05050,#a02828); }
+
+.chess-usage-nums {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+}
+.usage-used { color: #d4b85a; font-weight: 600; }
+.usage-sep  { color: #444; }
+.usage-rem  { color: #888; }
