@@ -254,14 +254,11 @@ importScripts('/solver.js')
 self.onmessage = (e) => {
   if (e.data.type !== 'solve') return
 
-  const { hand, total } = e.data
+  // unit を1つ受け取って1兵種だけ計算（並列化のため）
+  const { hand, total, unit } = e.data
   try {
-    const units = []
-    for (const unit of ALL_UNITS) {
-      const result = solveUnit(M, unit, hand, total)
-      if (result) units.push(result)
-    }
-    self.postMessage({ type: 'result', data: { units } })
+    const result = solveUnit(M, unit, hand, total)
+    self.postMessage({ type: 'result', data: result })
   } catch (err) {
     self.postMessage({ type: 'error', data: err.message })
   }
