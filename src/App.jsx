@@ -7,10 +7,8 @@ const STRINGS = {
   ja: {
     title: 'パズル&サバイバル\n英雄特技 最適化ツール',
     chest: '手持ちチェス',
-    unitPref: '兵種選択',
-    unitHint: '自軍の主力兵種を選ぶと速く最適化できます',
     search: '最適配置を探索',
-    found: 'パターンの最適配置が見つかりました',
+    select_unit: '兵種を選んでください',
     of: '/',
     power: '戦力UP',
     status: '有効ステータス数',
@@ -18,7 +16,8 @@ const STRINGS = {
     shooter: 'シューター',
     rider: 'ライダー',
     troop: '部隊',
-    allUnit: '戦力重視',
+    skill1: '特技1',
+    skill2: '特技2',
     hint: 'チェスを増やすとさらに選択肢が広がります',
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
     err: 'エラーが発生しました。もう一度試してください。',
@@ -32,10 +31,8 @@ const STRINGS = {
   en: {
     title: 'Puzzle & Survival\nHero Skill Optimizer',
     chest: 'Chess Pieces',
-    unitPref: 'Unit Type',
-    unitHint: 'Select your main unit for faster results',
     search: 'Find Optimal Setup',
-    found: 'optimal pattern(s) found',
+    select_unit: 'Select your unit type',
     of: '/',
     power: 'Power UP',
     status: 'Active Stats',
@@ -43,7 +40,8 @@ const STRINGS = {
     shooter: 'Shooter',
     rider: 'Rider',
     troop: 'Troop',
-    allUnit: 'Max Power',
+    skill1: 'Skill 1',
+    skill2: 'Skill 2',
     hint: 'More pieces = more options',
     none: 'No patterns found.\nTry adding more pieces.',
     err: 'An error occurred. Please try again.',
@@ -57,10 +55,8 @@ const STRINGS = {
   zh: {
     title: '末日喧嚣\n英雄技能优化器',
     chest: '棋子数量',
-    unitPref: '兵种偏好',
-    unitHint: '选择主力兵种可加快优化速度',
     search: '搜索最优配置',
-    found: '找到最优配置',
+    select_unit: '请选择兵种',
     of: '/',
     power: '提升战力',
     status: '有效状态数',
@@ -68,7 +64,8 @@ const STRINGS = {
     shooter: '射击兵',
     rider: '骑乘兵',
     troop: '部队',
-    allUnit: '战力优先',
+    skill1: '技能1',
+    skill2: '技能2',
     hint: '增加棋子可获得更多选择',
     none: '未找到可配置方案\n请增加棋子数量',
     err: '发生错误，请重试',
@@ -82,10 +79,8 @@ const STRINGS = {
   ru: {
     title: 'Puzzle & Survival\nОптимизатор навыков',
     chest: 'Шахматные фигуры',
-    unitPref: 'Тип войска',
-    unitHint: 'Выберите тип для ускорения расчёта',
     search: 'Найти оптимум',
-    found: 'вариантов найдено',
+    select_unit: 'Выберите тип войска',
     of: '/',
     power: 'Рост силы',
     status: 'Активных статов',
@@ -93,7 +88,8 @@ const STRINGS = {
     shooter: 'Стрелок',
     rider: 'Всадник',
     troop: 'Отряд',
-    allUnit: 'Макс. сила',
+    skill1: 'Навык 1',
+    skill2: 'Навык 2',
     hint: 'Больше фигур — больше вариантов',
     none: 'Вариантов не найдено\nДобавьте больше фигур.',
     err: 'Произошла ошибка. Попробуйте снова.',
@@ -119,20 +115,15 @@ const BUFFS = {
   19: ['部隊','DEF',20,5000], 20: ['部隊','HP', 20,5000],
 }
 
-const UNIT_TARGETS = {
-  fighter: ['fighter'],
-  shooter: ['shooter'],
-  rider:   ['rider'],
-  all:     ['fighter','shooter','rider'],
-}
-
 const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
+
 
 // ============================================================
 // シェアテキスト生成
 // ============================================================
-function buildShareText(pattern, t) {
-  const b = pattern.buffs
+function buildShareText(unitResult, t) {
+  const b         = unitResult.buffs
+  const unitLabel = t[unitResult.unit] || unitResult.unit
   const lines = ['F','S','R','部隊'].map(key => {
     const label = { F: t.fighter, S: t.shooter, R: t.rider, '部隊': t.troop }[key]
     const parts = ['ATK','DEF','HP']
@@ -140,15 +131,15 @@ function buildShareText(pattern, t) {
       .map(s => `${s}+${b[key][s]}%`)
     return parts.length ? `${label}: ${parts.join(' / ')}` : null
   }).filter(Boolean)
-  return `【パズル&サバイバル 英雄特技】\n戦力+${pattern.power.toLocaleString()} / 有効ステータス${pattern.status_count}\n${lines.join('\n')}\n無料最適化ツール🔥\n${TOOL_URL}`
+  return `【パズル&サバイバル 英雄特技】${unitLabel}\n戦力+${unitResult.power.toLocaleString()} / 有効ステータス${unitResult.status_count}\n${lines.join('\n')}\n無料最適化ツール🔥\n${TOOL_URL}`
 }
 
 // ============================================================
 // シェアボタン
 // ============================================================
-function ShareButtons({ pattern, t }) {
+function ShareButtons({ unitResult, t }) {
   const [toast, setToast] = useState(false)
-  const text = buildShareText(pattern, t)
+  const text = buildShareText(unitResult, t)
 
   const handleDiscord = () => {
     navigator.clipboard.writeText(text).then(() => {
@@ -239,10 +230,10 @@ function FieldGrid({ field, label }) {
 // ============================================================
 function BuffTable({ buffs, t }) {
   const units = [
-    { key: 'F',     label: t.fighter },
-    { key: 'S',     label: t.shooter },
-    { key: 'R',     label: t.rider   },
-    { key: '部隊',  label: t.troop   },
+    { key: 'F',    label: t.fighter },
+    { key: 'S',    label: t.shooter },
+    { key: 'R',    label: t.rider   },
+    { key: '部隊', label: t.troop   },
   ]
   return (
     <table className="buff-table">
@@ -267,80 +258,65 @@ function BuffTable({ buffs, t }) {
 // ============================================================
 // スタッツ＋シェア
 // ============================================================
-function StatsPanel({ pattern, t }) {
+function StatsPanel({ unitResult, t }) {
   return (
     <div className="stats-section">
       <div className="top-stats">
-        <div className="stat-card"><div className="val">+{pattern.power.toLocaleString()}</div><div className="lbl">{t.power}</div></div>
-        <div className="stat-card"><div className="val">{pattern.status_count}</div><div className="lbl">{t.status}</div></div>
+        <div className="stat-card"><div className="val">+{unitResult.power.toLocaleString()}</div><div className="lbl">{t.power}</div></div>
+        <div className="stat-card"><div className="val">{unitResult.status_count}</div><div className="lbl">{t.status}</div></div>
       </div>
-      <BuffTable buffs={pattern.buffs} t={t} />
-      <ShareButtons pattern={pattern} t={t} />
+      <BuffTable buffs={unitResult.buffs} t={t} />
+      <ShareButtons unitResult={unitResult} t={t} />
     </div>
   )
 }
 
 // ============================================================
-// カルーセル
+// カルーセル（3兵種）
 // ============================================================
-function Carousel({ patterns, t }) {
+function Carousel({ units, t }) {
   const [current, setCurrent] = useState(0)
-  const total = patterns.length
-  const go = idx => setCurrent((idx + total) % total)
-  const p = patterns[current]
+  const total = units.length
+  const go    = idx => setCurrent((idx + total) % total)
+  const u     = units[current]
+
+  // フィールドラベルをキーから翻訳
+  const fieldLabel = (key) => key === 'skill1' ? t.skill1 : t.skill2
+
   return (
     <>
       <div className="pattern-msg">
-        <span>{total}</span> {t.found}・{current + 1} {t.of} {total}
+        {t.select_unit}・{current + 1} {t.of} {total}
       </div>
       <div className="carousel-wrap">
-        {p.fields.map((f, i) => (
+        {u.fields.map((f, i) => (
           <div key={i}>
             {i > 0 && <hr className="field-divider" />}
-            <FieldGrid field={f.field} label={p.fields.length > 1 ? f.label : null} />
+            <FieldGrid
+              field={f.field}
+              label={u.fields.length > 1 ? fieldLabel(f.key) : null}
+            />
           </div>
         ))}
+
         <div className="nav-row">
           <button className="nav-btn" onClick={() => go(current - 1)}>‹</button>
           <div className="dots">
-            {patterns.map((_, i) => (
-              <button key={i} className={`dot${i === current ? ' active' : ''}`} onClick={() => go(i)} />
+            {units.map((u2, i) => (
+              <button
+                key={i}
+                className={`dot${i === current ? ' active' : ''}`}
+                onClick={() => go(i)}
+                title={t[u2.unit]}
+              />
             ))}
           </div>
           <button className="nav-btn" onClick={() => go(current + 1)}>›</button>
         </div>
-        <StatsPanel pattern={p} t={t} />
+
+        <StatsPanel unitResult={u} t={t} />
       </div>
     </>
-  )
-}
-
-// ============================================================
-// 兵種選択ボタン
-// ============================================================
-function UnitSelector({ value, onChange, t }) {
-  const options = [
-    { key: 'fighter', label: `⚔️ ${t.fighter}` },
-    { key: 'shooter', label: `🏹 ${t.shooter}` },
-    { key: 'rider',   label: `🐴 ${t.rider}` },
-    { key: 'all',     label: `⚡ ${t.allUnit}` },
-  ]
-  return (
-    <div className="unit-selector-section">
-      <div className="chest-label">{t.unitPref}</div>
-      <div className="unit-selector-row">
-        {options.map(opt => (
-          <button
-            key={opt.key}
-            className={`unit-btn${value === opt.key ? ' active' : ''}`}
-            onClick={() => onChange(opt.key)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-      <div className="unit-hint">{t.unitHint}</div>
-    </div>
   )
 }
 
@@ -350,9 +326,8 @@ function UnitSelector({ value, onChange, t }) {
 export default function App() {
   const [lang, setLang]           = useState('ja')
   const [pieces, setPieces]       = useState({ green:8, blue:2, purple:8, gold:7, red:8 })
-  const [unitPref, setUnitPref]   = useState('fighter')
   const [status, setStatus]       = useState('idle')   // idle / loading / done / error
-  const [result, setResult]       = useState(null)
+  const [result, setResult]       = useState(null)     // { units: [...] }
   const [logs, setLogs]           = useState([])
   const [wasmReady, setWasmReady] = useState(false)
   const workerRef = useRef(null)
@@ -397,12 +372,11 @@ export default function App() {
     setResult(null)
     setLogs([])
 
-    const hand    = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
-    const total   = hand.reduce((a,b) => a+b, 0)
-    const targets = UNIT_TARGETS[unitPref] || ['fighter','shooter','rider']
+    const hand  = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
+    const total = hand.reduce((a,b) => a+b, 0)
 
-    // lang を渡してログ文字列をWorker側で多言語化
-    workerRef.current.postMessage({ type: 'solve', hand, targets, total, lang })
+    // targetsは廃止。常に3兵種をworker側で計算
+    workerRef.current.postMessage({ type: 'solve', hand, total, lang })
   }
 
   // ── 計算中止 ──
@@ -444,7 +418,7 @@ export default function App() {
           ))}
         </div>
 
-        <UnitSelector value={unitPref} onChange={setUnitPref} t={t} />
+        {/* UnitSelectorは削除 */}
 
         <div className="search-btn-wrap">
           {status === 'loading' ? (
@@ -476,25 +450,9 @@ export default function App() {
       {status === 'error' && <div className="no-result">{t.err}</div>}
 
       {status === 'done' && result && (
-        result.total === 0
+        result.units.length === 0
           ? <div className="no-result">{t.none}</div>
-          : result.total === 1
-            ? <>
-                <div className="pattern-msg">
-                  <span>1</span> {t.found}
-                  <br /><small style={{ color: '#555' }}>{t.hint}</small>
-                </div>
-                <div className="carousel-wrap">
-                  {result.patterns[0].fields.map((f, i) => (
-                    <div key={i}>
-                      {i > 0 && <hr className="field-divider" />}
-                      <FieldGrid field={f.field} label={result.patterns[0].fields.length > 1 ? f.label : null} />
-                    </div>
-                  ))}
-                  <StatsPanel pattern={result.patterns[0]} t={t} />
-                </div>
-              </>
-            : <Carousel patterns={result.patterns} t={t} />
+          : <Carousel units={result.units} t={t} />
       )}
     </div>
   )
