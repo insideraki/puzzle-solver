@@ -102,9 +102,31 @@ const STRINGS = {
     copied: 'Скопировано в буфер обмена',
     computing: 'Вычисление...',
     loading_wasm: 'Загрузка решателя...',
-    cancel: 'Отмена',
+    cancel: 'Отменить',
   },
 }
+
+// ============================================================
+// ゲームデータ
+// ============================================================
+const BUFFS = {
+  1:  ['S','HP',  10,2000], 2:  ['F','HP',  10,2000], 3:  ['R','HP',  10,2000],
+  4:  ['部隊','DEF', 5,2000], 5:  ['部隊','HP',  5,2000], 6:  ['S','DEF',10,2000],
+  7:  ['F','DEF',10,2000],  8:  ['R','DEF',10,2000],  9:  ['部隊','DEF', 5,2000],
+  10: ['部隊','HP',  5,2000], 11: ['S','ATK',20,5000], 12: ['F','ATK',20,5000],
+  13: ['R','ATK',20,5000], 14: ['部隊','DEF',20,5000], 15: ['部隊','HP', 20,5000],
+  16: ['S','ATK',20,5000], 17: ['F','ATK',20,5000],  18: ['R','ATK',20,5000],
+  19: ['部隊','DEF',20,5000], 20: ['部隊','HP', 20,5000],
+}
+
+const UNIT_TARGETS = {
+  fighter: ['fighter'],
+  shooter: ['shooter'],
+  rider:   ['rider'],
+  all:     ['fighter','shooter','rider'],
+}
+
+const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
 
 // ============================================================
 // シェアテキスト生成
@@ -171,7 +193,7 @@ function ShareButtons({ pattern, t }) {
 }
 
 // ============================================================
-// ローディングログ（リアルタイム表示）
+// ローディングログ（リアルタイム更新）
 // ============================================================
 function LoadingLog({ logs }) {
   const bottomRef = useRef(null)
@@ -323,117 +345,73 @@ function UnitSelector({ value, onChange, t }) {
 }
 
 // ============================================================
-// Worker管理フック
-// ============================================================
-function useWorker() {
-  const workerRef = useRef(null)
-  const [wasmReady, setWasmReady] = useState(false)
-
-  // 初回Worker生成（ページロード時にWASMをウォームアップ）
-  useEffect(() => {
-    const worker = new Worker('/solver.worker.js')
-    workerRef.current = worker
-    worker.onmessage = (e) => {
-      if (e.data.type === 'ready') setWasmReady(true)
-    }
-    worker.onerror = () => {}
-    return () => {
-      worker.terminate()
-    }
-  }, [])
-
-  const solve = useCallback((hand, unitPref, onLog, onDone, onError) => {
-    // 既存のWorkerを終了して新しいWorkerを作る
-    // → 前の計算を確実にキャンセルし、クリーンな状態で開始
-    if (workerRef.current) {
-      workerRef.current.terminate()
-    }
-    setWasmReady(false)
-
-    const worker = new Worker('/solver.worker.js')
-    workerRef.current = worker
-
-    worker.onmessage = (e) => {
-      const { type, line, result, msg } = e.data
-      if (type === 'ready') {
-        setWasmReady(true)
-        // WASM準備完了後にsolveを送信
-        worker.postMessage({ type: 'solve', hand, unitPref })
-      } else if (type === 'log') {
-        onLog(line)
-      } else if (type === 'done') {
-        onDone(result)
-      } else if (type === 'error') {
-        onError(msg)
-      }
-    }
-
-    worker.onerror = (e) => {
-      onError(e.message || 'Worker error')
-    }
-  }, [])
-
-  const cancel = useCallback(() => {
-    if (workerRef.current) {
-      workerRef.current.terminate()
-    }
-    // Worker再作成してWASMをリロード
-    setWasmReady(false)
-    const worker = new Worker('/solver.worker.js')
-    workerRef.current = worker
-    worker.onmessage = (e) => {
-      if (e.data.type === 'ready') setWasmReady(true)
-    }
-    worker.onerror = () => {}
-  }, [])
-
-  return { wasmReady, solve, cancel }
-}
-
-// ============================================================
 // メインApp
 // ============================================================
 export default function App() {
-  const [lang, setLang] = useState('ja')
-  const [pieces, setPieces] = useState({ green:8, blue:2, purple:8, gold:7, red:8 })
-  const [unitPref, setUnitPref] = useState('fighter')
-  const [status, setStatus] = useState('idle')   // idle / loading / done / error
-  const [result, setResult] = useState(null)
-  const [logs, setLogs] = useState([])
+  const [lang, setLang]           = useState('ja')
+  const [pieces, setPieces]       = useState({ green:8, blue:2, purple:8, gold:7, red:8 })
+  const [unitPref, setUnitPref]   = useState('fighter')
+  const [status, setStatus]       = useState('idle')   // idle / loading / done / error
+  const [result, setResult]       = useState(null)
+  const [logs, setLogs]           = useState([])
+  const [wasmReady, setWasmReady] = useState(false)
+  const workerRef = useRef(null)
   const t = STRINGS[lang]
 
-  const { wasmReady, solve, cancel } = useWorker()
+  // ── Worker生成 ──
+  const createWorker = useCallback(() => {
+    const w = new Worker(new URL('./solver.worker.js', import.meta.url))
+    w.onmessage = (e) => {
+      switch (e.data.type) {
+        case 'ready':
+          setWasmReady(true)
+          break
+        case 'log':
+          setLogs(prev => [...prev, e.data.data])
+          break
+        case 'result':
+          setResult(e.data.data)
+          setStatus('done')
+          break
+        case 'error':
+          setLogs(prev => [...prev, `[error] ${e.data.data}`])
+          setStatus('error')
+          break
+      }
+    }
+    workerRef.current = w
+  }, [])
+
+  useEffect(() => {
+    createWorker()
+    return () => workerRef.current?.terminate()
+  }, [createWorker])
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
 
+  // ── 計算開始 ──
   const handleSolve = () => {
+    if (!wasmReady || !workerRef.current) return
     setStatus('loading')
     setResult(null)
     setLogs([])
 
-    // C側の hand 順: [red, blue, green, purple, gold]
-    const hand = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
+    const hand    = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
+    const total   = hand.reduce((a,b) => a+b, 0)
+    const targets = UNIT_TARGETS[unitPref] || ['fighter','shooter','rider']
 
-    solve(
-      hand,
-      unitPref,
-      (line) => setLogs(prev => [...prev, line]),
-      (res) => {
-        setResult(res)
-        setStatus('done')
-      },
-      (msg) => {
-        setLogs(prev => [...prev, `[error] ${msg}`])
-        setStatus('error')
-      }
-    )
+    // lang を渡してログ文字列をWorker側で多言語化
+    workerRef.current.postMessage({ type: 'solve', hand, targets, total, lang })
   }
 
+  // ── 計算中止 ──
   const handleCancel = () => {
-    cancel()
+    workerRef.current?.terminate()
+    setWasmReady(false)
     setStatus('idle')
     setLogs([])
+    createWorker()
   }
 
   return (
@@ -470,8 +448,8 @@ export default function App() {
 
         <div className="search-btn-wrap">
           {status === 'loading' ? (
-            <button className="search-btn cancel-btn" onClick={handleCancel}>
-              ✕ {t.cancel}
+            <button className="cancel-btn" onClick={handleCancel}>
+              ⏹ {t.cancel}
             </button>
           ) : (
             <button
@@ -488,7 +466,7 @@ export default function App() {
       {/* 広告スペース */}
       <div className="ad-space" />
 
-      {/* ログ表示（リアルタイム） */}
+      {/* ログ表示 */}
       {logs.length > 0 && <LoadingLog logs={logs} />}
 
       {status === 'loading' && logs.length === 0 && (
