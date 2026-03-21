@@ -188,21 +188,15 @@ function ShareButtons({ unitResult, t }) {
 }
 
 // ============================================================
-// ローディングログ（リアルタイム更新）
+// 計算中アニメーション
 // ============================================================
-function LoadingLog({ logs }) {
-  const bottomRef = useRef(null)
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [logs])
+function ComputingIndicator({ t }) {
   return (
-    <div className="loading-log">
-      {logs.map((line, i) => (
-        <div key={i} className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}>
-          {line}
-        </div>
-      ))}
-      <div ref={bottomRef} />
+    <div className="computing-indicator">
+      <div className="computing-dots">
+        <span /><span /><span />
+      </div>
+      <div className="computing-label">{t.computing}</div>
     </div>
   )
 }
@@ -328,19 +322,9 @@ export default function App() {
   const [pieces, setPieces]       = useState({ green:8, blue:2, purple:8, gold:7, red:8 })
   const [status, setStatus]       = useState('idle')   // idle / loading / done / error
   const [result, setResult]       = useState(null)     // { units: [...] }
-  const [logs, setLogs]           = useState([])
   const [wasmReady, setWasmReady] = useState(false)
   const workerRef = useRef(null)
   const t = STRINGS[lang]
-
-  const logBufferRef = useRef([])
-  const logTimerRef  = useRef(null)
-
-  const flushLogs = useCallback(() => {
-    if (logBufferRef.current.length === 0) return
-    const batch = logBufferRef.current.splice(0)
-    setLogs(prev => [...prev, ...batch])
-  }, [])
 
   // ── Worker生成 ──
   const createWorker = useCallback(() => {
@@ -350,34 +334,17 @@ export default function App() {
         case 'ready':
           setWasmReady(true)
           break
-        case 'log':
-          // 100msバッチでまとめてsetState → 再レンダリング回数を削減
-          logBufferRef.current.push(e.data.data)
-          if (!logTimerRef.current) {
-            logTimerRef.current = setTimeout(() => {
-              logTimerRef.current = null
-              flushLogs()
-            }, 100)
-          }
-          break
         case 'result':
-          clearTimeout(logTimerRef.current)
-          logTimerRef.current = null
-          flushLogs()
           setResult(e.data.data)
           setStatus('done')
           break
         case 'error':
-          clearTimeout(logTimerRef.current)
-          logTimerRef.current = null
-          flushLogs()
-          setLogs(prev => [...prev, `[error] ${e.data.data}`])
           setStatus('error')
           break
       }
     }
     workerRef.current = w
-  }, [flushLogs])
+  }, [])
 
   useEffect(() => {
     createWorker()
@@ -392,7 +359,6 @@ export default function App() {
     if (!wasmReady || !workerRef.current) return
     setStatus('loading')
     setResult(null)
-    setLogs([])
 
     const hand  = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
     const total = hand.reduce((a,b) => a+b, 0)
@@ -406,7 +372,6 @@ export default function App() {
     workerRef.current?.terminate()
     setWasmReady(false)
     setStatus('idle')
-    setLogs([])
     createWorker()
   }
 
@@ -462,12 +427,7 @@ export default function App() {
       {/* 広告スペース */}
       <div className="ad-space" />
 
-      {/* ログ表示 */}
-      {logs.length > 0 && <LoadingLog logs={logs} />}
-
-      {status === 'loading' && logs.length === 0 && (
-        <div className="no-result">{t.computing}</div>
-      )}
+      {status === 'loading' && <ComputingIndicator t={t} />}
 
       {status === 'error' && <div className="no-result">{t.err}</div>}
 
