@@ -3,12 +3,21 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
 const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
 
+const UNIT_TARGETS = {
+  fighter: ['fighter'],
+  shooter: ['shooter'],
+  rider:   ['rider'],
+  all:     ['fighter','shooter','rider'],
+}
+
 const STRINGS = {
   ja: {
     title: 'パズル&サバイバル\n英雄特技 最適化ツール',
     chest: '手持ちチェス',
+    unitPref: '兵種選択',
+    unitHint: '自軍の主力兵種を選ぶと速く最適化できます',
     search: '最適配置を探索',
-    select_unit: '兵種を選んでください',
+    result_count: (n) => `${n}通りの配置が見つかりました`,
     of: '/',
     power: '戦力UP',
     status: '有効ステータス数',
@@ -16,9 +25,9 @@ const STRINGS = {
     shooter: 'シューター',
     rider: 'ライダー',
     troop: '部隊',
+    allUnit: '戦力重視',
     skill1: '特技1',
     skill2: '特技2',
-    result_count: (n) => `${n}通りの配置が見つかりました`,
     hint: 'チェスを増やすとさらに選択肢が広がります',
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
     err: 'エラーが発生しました。もう一度試してください。',
@@ -32,8 +41,10 @@ const STRINGS = {
   en: {
     title: 'Puzzle & Survival\nHero Skill Optimizer',
     chest: 'Chess Pieces',
+    unitPref: 'Unit Type',
+    unitHint: 'Select your main unit for faster results',
     search: 'Find Optimal Setup',
-    select_unit: 'Select your unit type',
+    result_count: (n) => `${n} pattern(s) found`,
     of: '/',
     power: 'Power UP',
     status: 'Active Stats',
@@ -41,9 +52,9 @@ const STRINGS = {
     shooter: 'Shooter',
     rider: 'Rider',
     troop: 'Troop',
+    allUnit: 'Max Power',
     skill1: 'Skill 1',
     skill2: 'Skill 2',
-    result_count: (n) => `${n} pattern(s) found`,
     hint: 'More pieces = more options',
     none: 'No patterns found.\nTry adding more pieces.',
     err: 'An error occurred. Please try again.',
@@ -57,8 +68,10 @@ const STRINGS = {
   zh: {
     title: '末日喧嚣\n英雄技能优化器',
     chest: '棋子数量',
+    unitPref: '兵种偏好',
+    unitHint: '选择主力兵种可加快优化速度',
     search: '搜索最优配置',
-    select_unit: '请选择兵种',
+    result_count: (n) => `找到 ${n} 种配置`,
     of: '/',
     power: '提升战力',
     status: '有效状态数',
@@ -66,9 +79,9 @@ const STRINGS = {
     shooter: '射击兵',
     rider: '骑乘兵',
     troop: '部队',
+    allUnit: '战力优先',
     skill1: '技能1',
     skill2: '技能2',
-    result_count: (n) => `找到 ${n} 种配置`,
     hint: '增加棋子可获得更多选择',
     none: '未找到可配置方案\n请增加棋子数量',
     err: '发生错误，请重试',
@@ -82,8 +95,10 @@ const STRINGS = {
   ru: {
     title: 'Puzzle & Survival\nОптимизатор навыков',
     chest: 'Шахматные фигуры',
+    unitPref: 'Тип войска',
+    unitHint: 'Выберите тип для ускорения расчёта',
     search: 'Найти оптимум',
-    select_unit: 'Выберите тип войска',
+    result_count: (n) => `Найдено вариантов: ${n}`,
     of: '/',
     power: 'Рост силы',
     status: 'Активных статов',
@@ -91,9 +106,9 @@ const STRINGS = {
     shooter: 'Стрелок',
     rider: 'Всадник',
     troop: 'Отряд',
+    allUnit: 'Макс. сила',
     skill1: 'Навык 1',
     skill2: 'Навык 2',
-    result_count: (n) => `Найдено вариантов: ${n}`,
     hint: 'Больше фигур — больше вариантов',
     none: 'Вариантов не найдено\nДобавьте больше фигур.',
     err: 'Произошла ошибка. Попробуйте снова.',
@@ -119,16 +134,11 @@ const BUFFS = {
   19: ['部隊','DEF',20,5000], 20: ['部隊','HP', 20,5000],
 }
 
-const COLOR_MAP = { '-1':'empty', 0:'red', 1:'blue', 2:'green', 3:'purple', 4:'gold' }
-const ALL_UNITS = ['fighter', 'shooter', 'rider']
-
-
 // ============================================================
 // シェアテキスト生成
 // ============================================================
-function buildShareText(unitResult, t) {
-  const b         = unitResult.buffs
-  const unitLabel = t[unitResult.unit] || unitResult.unit
+function buildShareText(pattern, t) {
+  const b = pattern.buffs
   const lines = ['F','S','R','部隊'].map(key => {
     const label = { F: t.fighter, S: t.shooter, R: t.rider, '部隊': t.troop }[key]
     const parts = ['ATK','DEF','HP']
@@ -136,15 +146,15 @@ function buildShareText(unitResult, t) {
       .map(s => `${s}+${b[key][s]}%`)
     return parts.length ? `${label}: ${parts.join(' / ')}` : null
   }).filter(Boolean)
-  return `【パズル&サバイバル 英雄特技】${unitLabel}\n戦力+${unitResult.power.toLocaleString()} / 有効ステータス${unitResult.status_count}\n${lines.join('\n')}\n無料最適化ツール🔥\n${TOOL_URL}`
+  return `【パズル&サバイバル 英雄特技】\n戦力+${pattern.power.toLocaleString()} / 有効ステータス${pattern.status_count}\n${lines.join('\n')}\n無料最適化ツール🔥\n${TOOL_URL}`
 }
 
 // ============================================================
 // シェアボタン
 // ============================================================
-function ShareButtons({ unitResult, t }) {
+function ShareButtons({ pattern, t }) {
   const [toast, setToast] = useState(false)
-  const text = buildShareText(unitResult, t)
+  const text = buildShareText(pattern, t)
 
   const handleDiscord = () => {
     navigator.clipboard.writeText(text).then(() => {
@@ -257,40 +267,35 @@ function BuffTable({ buffs, t }) {
 // ============================================================
 // スタッツ＋シェア
 // ============================================================
-function StatsPanel({ unitResult, t }) {
+function StatsPanel({ pattern, t }) {
   return (
     <div className="stats-section">
       <div className="top-stats">
-        <div className="stat-card"><div className="val">+{unitResult.power.toLocaleString()}</div><div className="lbl">{t.power}</div></div>
-        <div className="stat-card"><div className="val">{unitResult.status_count}</div><div className="lbl">{t.status}</div></div>
+        <div className="stat-card"><div className="val">+{pattern.power.toLocaleString()}</div><div className="lbl">{t.power}</div></div>
+        <div className="stat-card"><div className="val">{pattern.status_count}</div><div className="lbl">{t.status}</div></div>
       </div>
-      <BuffTable buffs={unitResult.buffs} t={t} />
-      <ShareButtons unitResult={unitResult} t={t} />
+      <BuffTable buffs={pattern.buffs} t={t} />
+      <ShareButtons pattern={pattern} t={t} />
     </div>
   )
 }
 
 // ============================================================
-// カルーセル（3兵種）
+// カルーセル
 // ============================================================
-function Carousel({ units, t }) {
+function Carousel({ patterns, t }) {
   const [current, setCurrent] = useState(0)
-  const total = units.length
+  const total = patterns.length
   const go    = idx => setCurrent((idx + total) % total)
-  const u     = units[current]
-
-  // フィールドラベルをキーから翻訳
+  const p     = patterns[current]
   const fieldLabel = (key) => key === 'skill1' ? t.skill1 : t.skill2
 
   return (
     <div className="carousel-wrap">
-      {u.fields.map((f, i) => (
+      {p.fields.map((f, i) => (
         <div key={i}>
           {i > 0 && <hr className="field-divider" />}
-          <FieldGrid
-            field={f.field}
-            label={u.fields.length > 1 ? fieldLabel(f.key) : null}
-          />
+          <FieldGrid field={f.field} label={p.fields.length > 1 ? fieldLabel(f.key) : null} />
         </div>
       ))}
 
@@ -298,19 +303,44 @@ function Carousel({ units, t }) {
         <div className="nav-row">
           <button className="nav-btn" onClick={() => go(current - 1)}>‹</button>
           <div className="dots">
-            {units.map((_, i) => (
-              <button
-                key={i}
-                className={`dot${i === current ? ' active' : ''}`}
-                onClick={() => go(i)}
-              />
+            {patterns.map((_, i) => (
+              <button key={i} className={`dot${i === current ? ' active' : ''}`} onClick={() => go(i)} />
             ))}
           </div>
           <button className="nav-btn" onClick={() => go(current + 1)}>›</button>
         </div>
       )}
 
-      <StatsPanel unitResult={u} t={t} />
+      <StatsPanel pattern={p} t={t} />
+    </div>
+  )
+}
+
+// ============================================================
+// 兵種選択ボタン
+// ============================================================
+function UnitSelector({ value, onChange, t }) {
+  const options = [
+    { key: 'fighter', label: `⚔️ ${t.fighter}` },
+    { key: 'shooter', label: `🏹 ${t.shooter}` },
+    { key: 'rider',   label: `🐴 ${t.rider}` },
+    { key: 'all',     label: `⚡ ${t.allUnit}` },
+  ]
+  return (
+    <div className="unit-selector-section">
+      <div className="chest-label">{t.unitPref}</div>
+      <div className="unit-selector-row">
+        {options.map(opt => (
+          <button
+            key={opt.key}
+            className={`unit-btn${value === opt.key ? ' active' : ''}`}
+            onClick={() => onChange(opt.key)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <div className="unit-hint">{t.unitHint}</div>
     </div>
   )
 }
@@ -321,97 +351,72 @@ function Carousel({ units, t }) {
 export default function App() {
   const [lang, setLang]           = useState('ja')
   const [pieces, setPieces]       = useState({ green:0, blue:0, purple:0, gold:0, red:0 })
-  const [status, setStatus]       = useState('idle')   // idle / loading / done / error
-  const [result, setResult]       = useState(null)     // { units: [...] }
-  const [readyCount, setReadyCount] = useState(0)
-  const workersRef  = useRef([])   // 3つのWorkerを常駐
-  const pendingRef  = useRef([])   // 結果収集用
+  const [unitPref, setUnitPref]   = useState('fighter')
+  const [status, setStatus]       = useState('idle')
+  const [result, setResult]       = useState(null)
+  const [wasmReady, setWasmReady] = useState(false)
+  const workerRef = useRef(null)
   const t = STRINGS[lang]
 
-  const wasmReady = readyCount >= ALL_UNITS.length
-
-  // ── Worker群を生成（マウント時のみ） ──
-  useEffect(() => {
-    const workers = ALL_UNITS.map((unit) => {
-      const w = new Worker('/solver.worker.js')
-      w.onmessage = (e) => {
-        switch (e.data.type) {
-          case 'ready':
-            setReadyCount(n => n + 1)
-            break
-          case 'result': {
-            const r = e.data.data  // null or unitResult
-            if (r) pendingRef.current.push(r)
-            // 3つ全部揃ったら表示
-            if (pendingRef.current.length === ALL_UNITS.length) {
-              setResult({ units: pendingRef.current })
-              setStatus('done')
-            }
-            break
-          }
-          case 'error':
-            setStatus('error')
-            break
-        }
+  // ── Worker生成 ──
+  const createWorker = useCallback(() => {
+    const w = new Worker('/solver.worker.js')
+    w.onmessage = (e) => {
+      switch (e.data.type) {
+        case 'ready':
+          setWasmReady(true)
+          break
+        case 'result':
+          setResult(e.data.data)
+          setStatus('done')
+          break
+        case 'error':
+          setStatus('error')
+          break
       }
-      return w
-    })
-    workersRef.current = workers
-    return () => workers.forEach(w => w.terminate())
+    }
+    workerRef.current = w
   }, [])
+
+  useEffect(() => {
+    createWorker()
+    return () => workerRef.current?.terminate()
+  }, [createWorker])
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
 
   // ── 計算開始 ──
   const handleSolve = () => {
-    if (!wasmReady) return
+    if (!wasmReady || !workerRef.current) return
     setStatus('loading')
     setResult(null)
-    pendingRef.current = []
 
-    const hand  = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
-    const total = hand.reduce((a,b) => a+b, 0)
+    const hand    = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
+    const total   = hand.reduce((a,b) => a+b, 0)
+    const targets = UNIT_TARGETS[unitPref] || ['fighter']
 
-    // 3つのWorkerに各兵種を同時送信
-    ALL_UNITS.forEach((unit, i) => {
-      workersRef.current[i].postMessage({ type: 'solve', hand, total, unit })
-    })
+    workerRef.current.postMessage({ type: 'solve', hand, total, targets })
   }
 
-  // ── 計算中止：Workerを再生成して即リセット ──
+  // ── 計算中止 ──
   const handleCancel = () => {
-    workersRef.current.forEach(w => w.terminate())
-    workersRef.current = []
-    pendingRef.current = []
-    setReadyCount(0)
+    workerRef.current?.terminate()
+    setWasmReady(false)
     setStatus('idle')
     setResult(null)
-    // Worker再生成
-    const workers = ALL_UNITS.map((unit) => {
-      const w = new Worker('/solver.worker.js')
-      w.onmessage = (e) => {
-        switch (e.data.type) {
-          case 'ready':
-            setReadyCount(n => n + 1)
-            break
-          case 'result': {
-            const r = e.data.data
-            if (r) pendingRef.current.push(r)
-            if (pendingRef.current.length === ALL_UNITS.length) {
-              setResult({ units: pendingRef.current })
-              setStatus('done')
-            }
-            break
-          }
-          case 'error':
-            setStatus('error')
-            break
-        }
-      }
-      return w
+    createWorker()
+  }
+
+  // 重複除去
+  const getDeduped = (patterns) => {
+    const seen = new Set()
+    return patterns.filter(p => {
+      const sig = p.fields.map(f => JSON.stringify(f.field)).join('|')
+      if (seen.has(sig)) return false
+      seen.add(sig)
+      return true
     })
-    workersRef.current = workers
   }
 
   return (
@@ -444,7 +449,7 @@ export default function App() {
           ))}
         </div>
 
-        {/* UnitSelectorは削除 */}
+        <UnitSelector value={unitPref} onChange={setUnitPref} t={t} />
 
         <div className="search-btn-wrap">
           {status === 'loading' ? (
@@ -452,11 +457,7 @@ export default function App() {
               ⏹ {t.cancel}
             </button>
           ) : (
-            <button
-              className="search-btn"
-              onClick={handleSolve}
-              disabled={!wasmReady}
-            >
+            <button className="search-btn" onClick={handleSolve} disabled={!wasmReady}>
               {!wasmReady ? t.loading_wasm : t.search}
             </button>
           )}
@@ -467,21 +468,14 @@ export default function App() {
       <div className="ad-space" />
 
       {status === 'loading' && <ComputingIndicator t={t} />}
-
-      {status === 'error' && <div className="no-result">{t.err}</div>}
+      {status === 'error'   && <div className="no-result">{t.err}</div>}
 
       {status === 'done' && result && (() => {
-        const seen = new Set()
-        const deduped = result.units.filter(u => {
-          const sig = u.fields.map(f => JSON.stringify(f.field)).join('|')
-          if (seen.has(sig)) return false
-          seen.add(sig)
-          return true
-        })
+        const deduped = getDeduped(result.patterns)
         if (deduped.length === 0) return <div className="no-result">{t.none}</div>
         return <>
           <div className="pattern-msg">{t.result_count(deduped.length)}</div>
-          <Carousel units={deduped} t={t} />
+          <Carousel patterns={deduped} t={t} />
         </>
       })()}
     </div>
