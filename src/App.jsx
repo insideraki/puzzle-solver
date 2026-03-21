@@ -319,7 +319,7 @@ function Carousel({ units, t }) {
 // ============================================================
 export default function App() {
   const [lang, setLang]           = useState('ja')
-  const [pieces, setPieces]       = useState({ green:8, blue:2, purple:8, gold:7, red:8 })
+  const [pieces, setPieces]       = useState({ green:0, blue:0, purple:0, gold:0, red:0 })
   const [status, setStatus]       = useState('idle')   // idle / loading / done / error
   const [result, setResult]       = useState(null)     // { units: [...] }
   const [wasmReady, setWasmReady] = useState(false)
