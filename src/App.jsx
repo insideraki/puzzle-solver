@@ -284,39 +284,35 @@ function Carousel({ units, t }) {
   const fieldLabel = (key) => key === 'skill1' ? t.skill1 : t.skill2
 
   return (
-    <>
-      <div className="pattern-msg">
-        {t.select_unit}・{current + 1} {t.of} {total}
-      </div>
-      <div className="carousel-wrap">
-        {u.fields.map((f, i) => (
-          <div key={i}>
-            {i > 0 && <hr className="field-divider" />}
-            <FieldGrid
-              field={f.field}
-              label={u.fields.length > 1 ? fieldLabel(f.key) : null}
-            />
-          </div>
-        ))}
+    <div className="carousel-wrap">
+      {u.fields.map((f, i) => (
+        <div key={i}>
+          {i > 0 && <hr className="field-divider" />}
+          <FieldGrid
+            field={f.field}
+            label={u.fields.length > 1 ? fieldLabel(f.key) : null}
+          />
+        </div>
+      ))}
 
+      {total > 1 && (
         <div className="nav-row">
           <button className="nav-btn" onClick={() => go(current - 1)}>‹</button>
           <div className="dots">
-            {units.map((u2, i) => (
+            {units.map((_, i) => (
               <button
                 key={i}
                 className={`dot${i === current ? ' active' : ''}`}
                 onClick={() => go(i)}
-                title={t[u2.unit]}
               />
             ))}
           </div>
           <button className="nav-btn" onClick={() => go(current + 1)}>›</button>
         </div>
+      )}
 
-        <StatsPanel unitResult={u} t={t} />
-      </div>
-    </>
+      <StatsPanel unitResult={u} t={t} />
+    </div>
   )
 }
 
@@ -449,11 +445,18 @@ export default function App() {
 
       {status === 'error' && <div className="no-result">{t.err}</div>}
 
-      {status === 'done' && result && (
-        result.units.length === 0
+      {status === 'done' && result && (() => {
+        const seen = new Set()
+        const deduped = result.units.filter(u => {
+          const sig = u.fields.map(f => JSON.stringify(f.field)).join('|')
+          if (seen.has(sig)) return false
+          seen.add(sig)
+          return true
+        })
+        return deduped.length === 0
           ? <div className="no-result">{t.none}</div>
-          : <Carousel units={result.units} t={t} />
-      )}
+          : <Carousel units={deduped} t={t} />
+      })()}
     </div>
   )
 }
