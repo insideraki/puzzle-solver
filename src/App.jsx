@@ -204,18 +204,19 @@ function ShareButtons({ pattern, t }) {
 // ローディングログ
 // ============================================================
 function LoadingLog({ logs }) {
-  const bottomRef = useRef(null)
+  const boxRef = useRef(null)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (boxRef.current) {
+      boxRef.current.scrollTop = boxRef.current.scrollHeight
+    }
   }, [logs])
   return (
-    <div className="loading-log">
+    <div className="loading-log" ref={boxRef}>
       {logs.map((line, i) => (
         <div key={i} className={`log-line${i === logs.length - 1 ? ' log-line-new' : ''}`}>
           {line}
         </div>
       ))}
-      <div ref={bottomRef} />
     </div>
   )
 }
@@ -273,11 +274,49 @@ function BuffTable({ buffs, t }) {
 }
 
 // ============================================================
+// チェス使用数・残り数
+// ============================================================
+const COLORS_ORDER = ['green', 'blue', 'purple', 'gold', 'red']
+
+function ChessUsage({ pattern, hand }) {
+  if (!hand) return null
+
+  // 全フィールドの色をカウント
+  const used = { green:0, blue:0, purple:0, gold:0, red:0 }
+  for (const f of pattern.fields) {
+    for (const color of f.field) {
+      if (color !== 'empty' && used[color] !== undefined) used[color]++
+    }
+  }
+
+  return (
+    <div className="chess-usage">
+      {COLORS_ORDER.map(color => {
+        const total = hand[color]
+        const u = used[color]
+        const rem = total - u
+        return (
+          <div key={color} className="chess-usage-item">
+            <div className={`chest-icon-sm ${color}`}><div className="chest-icon-inner-sm" /></div>
+            <div className="chess-usage-nums">
+              <span className="usage-used">{u}</span>
+              <span className="usage-sep">/</span>
+              <span className="usage-rem">{rem}</span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ============================================================
 // スタッツ＋シェア
 // ============================================================
-function StatsPanel({ pattern, t }) {
+function StatsPanel({ pattern, hand, t }) {
   return (
     <div className="stats-section">
+      <ChessUsage pattern={pattern} hand={hand} />
       <div className="top-stats">
         <div className="stat-card"><div className="val">+{pattern.power.toLocaleString()}</div><div className="lbl">{t.power}</div></div>
         <div className="stat-card"><div className="val">{pattern.status_count}</div><div className="lbl">{t.status}</div></div>
@@ -291,7 +330,7 @@ function StatsPanel({ pattern, t }) {
 // ============================================================
 // カルーセル
 // ============================================================
-function Carousel({ patterns, t }) {
+function Carousel({ patterns, hand, t }) {
   const [current, setCurrent] = useState(0)
   const total = patterns.length
   const go = idx => setCurrent((idx + total) % total)
@@ -317,7 +356,7 @@ function Carousel({ patterns, t }) {
           </div>
           <button className="nav-btn" onClick={() => go(current + 1)}>›</button>
         </div>
-        <StatsPanel pattern={p} t={t} />
+        <StatsPanel pattern={p} hand={hand} t={t} />
       </div>
     </>
   )
@@ -361,6 +400,7 @@ export default function App() {
   const [unitPref, setUnitPref] = useState('fighter')
   const [status, setStatus] = useState('idle')
   const [result, setResult] = useState(null)
+  const [resultHand, setResultHand] = useState(null)  // 計算時のhand保存
   const [logs, setLogs] = useState([])
   const [wasmReady, setWasmReady] = useState(false)
   const workerRef = useRef(null)
@@ -408,6 +448,7 @@ export default function App() {
     const total   = hand.reduce((a,b) => a+b, 0)
     const targets = UNIT_TARGETS[unitPref] || ['fighter']
 
+    setResultHand({ green: pieces.green, blue: pieces.blue, purple: pieces.purple, gold: pieces.gold, red: pieces.red })
     workerRef.current.postMessage({ type: 'solve', hand, total, targets, lang })
   }
 
@@ -493,10 +534,10 @@ export default function App() {
                       <FieldGrid field={f.field} label={result.patterns[0].fields.length > 1 ? f.label : null} />
                     </div>
                   ))}
-                  <StatsPanel pattern={result.patterns[0]} t={t} />
+                  <StatsPanel pattern={result.patterns[0]} hand={resultHand} t={t} />
                 </div>
               </>
-            : <Carousel patterns={result.patterns} t={t} />
+            : <Carousel patterns={result.patterns} hand={resultHand} t={t} />
       )}
     </div>
   )
