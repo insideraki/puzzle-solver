@@ -151,75 +151,6 @@ function wasmSetupUnit(M, unit) {
   M._free(orderPtr); M._free(powerPtr); M._free(b4Ptr)
 }
 
-function wasmRunSolverParallel(unit, hand) {
-  return new Promise((resolve) => {
-    wasmSetupUnit(M, unit)
-
-    const handPtr = M._malloc(5 * 4)
-    for (let i = 0; i < 5; i++) M.setValue(handPtr + i*4, hand[i], 'i32')
-    M._run_solve_begin(handPtr)
-    M._free(handPtr)
-
-    const nplFirst = M._get_npl_first()
-    const allJobs  = [-1, ...Array.from({length: nplFirst}, (_, i) => i)]
-
-    const NUM_WORKERS = 4
-    const workerJobs  = Array.from({length: NUM_WORKERS}, () => [])
-    allJobs.forEach((job, idx) => workerJobs[idx % NUM_WORKERS].push(job))
-
-    const cfg      = UNITS_CFG[unit]
-    const orderArr = getPidOrder(unit)
-    const powerArr = [0, ...Array.from({length:20}, (_, i) => BUFFS[i+1][3])]
-    const b4Arr    = cfg.best4
-
-    let completed   = 0
-    let bestResult  = null
-    const total     = NUM_WORKERS
-
-    function checkDone() {
-      completed++
-      if (completed === total) {
-        if (!bestResult) {
-          resolve({ power: 0, status_count: 0, field: Array(35).fill(-1), patterns: [] })
-        } else {
-          resolve({
-            power:        bestResult.power,
-            status_count: bestResult.nb,
-            field:        bestResult.field,
-            patterns:     bestResult.patterns,
-          })
-        }
-      }
-    }
-
-    function isBetter(r, best) {
-      if (!best) return true
-      if (r.b4   > best.b4)   return true
-      if (r.b4   < best.b4)   return false
-      if (r.yp4  > best.yp4)  return true
-      if (r.yp4  < best.yp4)  return false
-      if (r.power > best.power) return true
-      if (r.power < best.power) return false
-      return r.nb > best.nb
-    }
-
-    for (let w = 0; w < NUM_WORKERS; w++) {
-      if (workerJobs[w].length === 0) { checkDone(); continue }
-      const worker = new Worker('/sub.worker.js')
-      worker.onmessage = (e) => {
-        if (e.data.type === 'ready') {
-          worker.postMessage({ type: 'run', jobs: workerJobs[w], handArr: hand, orderArr, powerArr, b4Arr })
-        } else if (e.data.type === 'done') {
-          const r = e.data.result
-          if (isBetter(r, bestResult)) bestResult = r
-          worker.terminate()
-          checkDone()
-        }
-      }
-    }
-  })
-}
-
 function wasmRunSolver(M, unit, hand, onLog) {
   wasmSetupUnit(M, unit)
 
@@ -252,7 +183,6 @@ function wasmRunSolver(M, unit, hand, onLog) {
 // WASMロード
 // ============================================================
 let M = null
-
 self.Module = {
   onRuntimeInitialized() {
     M = self.Module
@@ -264,7 +194,7 @@ importScripts('/solver.js')
 // ============================================================
 // メッセージ受信・ソルバー実行
 // ============================================================
-self.onmessage = async (e) => {
+self.onmessage = (e) => {
   if (e.data.type !== 'solve') return
 
   const { hand, targets, total, lang } = e.data
@@ -278,39 +208,22 @@ self.onmessage = async (e) => {
       log(S.best(b4, yp4, power.toLocaleString(), nb))
     }
 
-    if (total < 30) {
-      // ── 1フィールド ──
-      const candidates = []
-      for (const unit of targets) {
-        const label = S.unit[unit] || unit
-        log(S.skill1_start(label))
-        const r = await wasmRunSolverParallel(unit, hand)
-        if (r.power > 0) {
-          log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
-          candidates.push({
-            power:        r.power,
-            status_count: r.status_count,
-            fields:       [{ label:'特技1', field: convertField(r.field) }],
-            buffs:        calcBuffs(r.patterns),
-          })
-        } else {
-          log(S.skill1_none(label))
-        }
-      }
-      candidates.sort((a,b) => b.power - a.power)
-      const seen = new Set()
-      for (const c of candidates) {
-        const sig = JSON.stringify(c.fields[0].field)
-        if (!seen.has(sig)) { seen.add(sig); patterns.push(c) }
-      }
-
-    } else {
-      // ── 2フィールド ──
+    {
+      // ── 常に2フィールド計算（特技2が組めない場合は特技1のみ） ──
       let bestUnit = null, bestR1 = null
+      let shooterResult = null
       for (const unit of targets) {
         const label = S.unit[unit] || unit
         log(S.skill1_start(label))
-        const r = await wasmRunSolverParallel(unit, hand)
+        let r
+        if (unit === 'rider' && hand[0] === hand[1] && shooterResult !== null) {
+          // 赤===青 の場合、シューター結果の色0↔1を入れ替えてライダー結果とする
+          const swappedField = shooterResult.field.map(c => c === 0 ? 1 : c === 1 ? 0 : c)
+          r = { power: shooterResult.power, status_count: shooterResult.status_count, field: swappedField, patterns: shooterResult.patterns }
+        } else {
+          r = wasmRunSolver(M, unit, hand, makeOnLog())
+          if (unit === 'shooter') shooterResult = r
+        }
         if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
         if (r.power > 0) {
           log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
@@ -330,14 +243,14 @@ self.onmessage = async (e) => {
         log(S.skill2_rest(remaining))
         log(S.skill2_start(bestLabel))
 
-        const r2 = await wasmRunSolverParallel(bestUnit, remaining)
+        const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
 
         if (r2.power === 0) {
           log(S.skill2_none())
           patterns = [{
             power:        bestR1.power,
             status_count: bestR1.status_count,
-            fields:       [{ label:'特技1', field: convertField(bestR1.field) }],
+            fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
             buffs:        calcBuffs(bestR1.patterns),
           }]
         } else {
@@ -348,8 +261,8 @@ self.onmessage = async (e) => {
             power:        totalPower,
             status_count: bestR1.status_count + r2.status_count,
             fields: [
-              { label:'特技1', field: convertField(bestR1.field) },
-              { label:'特技2', field: convertField(r2.field) },
+              { key:'skill1', field: convertField(bestR1.field) },
+              { key:'skill2', field: convertField(r2.field) },
             ],
             buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
           }]
