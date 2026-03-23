@@ -391,6 +391,15 @@ self.onmessage = async (e) => {
             ],
             buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(bestR2.patterns)),
           }]
+          // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加
+          if (hand[0] === hand[1]) {
+            const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
+            const swapped = {
+              ...patterns[0],
+              fields: patterns[0].fields.map(f => ({ ...f, field: swapField(f.field) }))
+            }
+            patterns.push(swapped)
+          }
         } else {
           log(S.skill1_done(label, bestR1.power.toLocaleString(), bestR1.status_count))
           patterns = [{
@@ -399,6 +408,15 @@ self.onmessage = async (e) => {
             fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
             buffs:        calcBuffs(bestR1.patterns),
           }]
+          // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加
+          if (hand[0] === hand[1]) {
+            const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
+            const swapped = {
+              ...patterns[0],
+              fields: patterns[0].fields.map(f => ({ ...f, field: swapField(f.field) }))
+            }
+            patterns.push(swapped)
+          }
         }
       }
     }
