@@ -349,7 +349,7 @@ self.onmessage = async (e) => {
           const c2 = [Math.min(r,2), Math.min(b,8), 8, 8, 7]  // 青優先
           // 赤↔青対称：赤>青はスキップ（既存ロジックと統一）
           combos.push(c1)
-          if (c1[0] !== c2[0]) combos.push(c2)
+          if (c1[0] !== c2[0] || c1[1] !== c2[1]) combos.push(c2)
         } else {
           enumerate(0, [0,0,0,0,0])
         }
