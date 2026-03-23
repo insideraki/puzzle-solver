@@ -211,19 +211,10 @@ self.onmessage = (e) => {
     {
       // ── 常に2フィールド計算（特技2が組めない場合は特技1のみ） ──
       let bestUnit = null, bestR1 = null
-      let shooterResult = null
       for (const unit of targets) {
         const label = S.unit[unit] || unit
         log(S.skill1_start(label))
-        let r
-        if (unit === 'rider' && hand[0] === hand[1] && shooterResult !== null) {
-          // 赤===青 の場合、シューター結果の色0↔1を入れ替えてライダー結果とする
-          const swappedField = shooterResult.field.map(c => c === 0 ? 1 : c === 1 ? 0 : c)
-          r = { power: shooterResult.power, status_count: shooterResult.status_count, field: swappedField, patterns: shooterResult.patterns }
-        } else {
-          r = wasmRunSolver(M, unit, hand, makeOnLog())
-          if (unit === 'shooter') shooterResult = r
-        }
+        const r = wasmRunSolver(M, unit, hand, makeOnLog())
         if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
         if (r.power > 0) {
           log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
@@ -241,6 +232,17 @@ self.onmessage = (e) => {
         const remaining = hand.map((h,i) => h - used[i])
 
         log(S.skill2_rest(remaining))
+
+        if (remaining.every(v => v === 0)) {
+          log(S.skill2_none())
+          patterns = [{
+            power:        bestR1.power,
+            status_count: bestR1.status_count,
+            fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
+            buffs:        calcBuffs(bestR1.patterns),
+          }]
+        } else {
+
         log(S.skill2_start(bestLabel))
 
         const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
@@ -267,6 +269,7 @@ self.onmessage = (e) => {
             buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
           }]
         }
+        } // end else (remaining not all zero)
       }
     }
 
