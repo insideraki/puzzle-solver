@@ -31,8 +31,8 @@ const STRINGS = {
     cancel: '計算を中止',
   },
   en: {
-    title: 'Puzzle & Survival\nHero Skill Optimizer',
-    chest: 'Chess Pieces',
+    title: 'Puzzle & Survival\nHero Specialty Optimizer',
+    chest: 'Available Tiles',
     unitPref: 'Unit Type',
     unitHint: 'Select your main unit for faster results',
     unit: { fighter:'Fighter', shooter:'Shooter', rider:'Rider' },
@@ -57,8 +57,8 @@ const STRINGS = {
     cancel: 'Cancel',
   },
   zh: {
-    title: '末日喧嚣\n英雄技能优化器',
-    chest: '棋子数量',
+    title: '末日喧嚣\n英雄专长优化器',
+    chest: '空闲棋子',
     unitPref: '兵种偏好',
     unitHint: '选择主力兵种可加快优化速度',
     unit: { fighter:'近战兵', shooter:'射击兵', rider:'骑乘兵' },
@@ -83,8 +83,8 @@ const STRINGS = {
     cancel: '取消计算',
   },
   ru: {
-    title: 'Puzzle & Survival\nОптимизатор навыков',
-    chest: 'Шахматные фигуры',
+    title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
+    chest: 'Доступные Плитки',
     unitPref: 'Тип войска',
     unitHint: 'Выберите тип для ускорения расчёта',
     unit: { fighter:'Боец', shooter:'Стрелок', rider:'Всадник' },
