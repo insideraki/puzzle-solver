@@ -523,7 +523,7 @@ body {
 .numpad-popup {
   background: #1a1a1a;
   border-radius: 16px 16px 0 0;
-  padding: 20px;
+  padding: 14px 16px;
   width: 100%;
   max-width: 400px;
 }
@@ -531,10 +531,10 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: bold;
   color: #eee;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   justify-content: center;
 }
 .numpad-color-dot {
@@ -550,42 +550,42 @@ body {
 .numpad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 .numpad-btn {
   background: #2e2e2e;
   color: #eee;
   border: none;
   border-radius: 10px;
-  font-size: 22px;
-  padding: 16px;
+  font-size: 20px;
+  padding: 12px;
   cursor: pointer;
 }
 .numpad-btn:active { background: #B79949; }
 .numpad-back { font-size: 18px; }
 .numpad-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 .numpad-cancel {
   flex: 1;
-  padding: 14px;
+  padding: 12px;
   background: #333;
   color: #aaa;
   border: none;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
 }
 .numpad-confirm {
   flex: 2;
-  padding: 14px;
+  padding: 12px;
   background: #B79949;
   color: #000;
   border: none;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
 }

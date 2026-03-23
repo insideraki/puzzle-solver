@@ -420,7 +420,7 @@ function NumpadPopup({ color, value, onPress, onBackspace, onConfirm, onCancel }
         </div>
         <div className="numpad-actions">
           <button className="numpad-cancel" onClick={onCancel}>キャンセル</button>
-          <button className="numpad-confirm" onClick={onConfirm}>確定</button>
+          <button className="numpad-confirm" onClick={onConfirm}>{color === 'red' ? '確定' : '確定→次へ'}</button>
         </div>
       </div>
     </div>
@@ -499,8 +499,16 @@ export default function App() {
   const numpadConfirm = () => {
     if (numpadTarget) {
       handleChange(numpadTarget, numpadInput)
+      const currentIndex = COLORS.indexOf(numpadTarget)
+      const nextColor = COLORS[currentIndex + 1]
+      if (nextColor) {
+        setNumpadTarget(nextColor)
+        setNumpadInput(String(pieces[nextColor]))
+        setNumpadOverwrite(true)
+      } else {
+        setNumpadTarget(null)
+      }
     }
-    setNumpadTarget(null)
   }
   const numpadCancel = () => setNumpadTarget(null)
 
@@ -552,6 +560,7 @@ export default function App() {
                 value={pieces[color]}
                 onChange={e => !isMobile && handleChange(color, e.target.value)}
                 readOnly={isMobile}
+                style={isMobile ? { pointerEvents: 'none' } : {}}
               />
               <div
                 className={`chest-icon ${color}`}
