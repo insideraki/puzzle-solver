@@ -318,7 +318,7 @@ self.onmessage = async (e) => {
         // F1候補を2通りに固定
         const g = hand[2], pu = hand[3], go = hand[4], r = hand[0], b = hand[1]
         const totalHand = hand.reduce((a,b) => a+b, 0)
-        const isOptimalFixed = totalHand >= 41 && g >= 8 && go >= 7 && pu >= 8 &&
+        const isOptimalFixed = totalHand >= 100 && g >= 8 && go >= 7 && pu >= 8 &&
           ((r >= 8 && b >= 2) || (r >= 2 && b >= 8))
 
         // 5色の全組み合わせ列挙
