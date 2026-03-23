@@ -320,6 +320,8 @@ self.onmessage = async (e) => {
           if (idx === 5) {
             // 全色0はスキップ
             if (current.every(v => v === 0)) return
+            // 赤(index 0)>青(index 1)の場合はスキップ（赤↔青対称）
+            if (current[0] > current[1]) return
             combos.push([...current])
             return
           }
