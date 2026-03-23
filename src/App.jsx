@@ -442,7 +442,9 @@ export default function App() {
   const [resultHand, setResultHand] = useState(null)  // 計算時のhand保存
   const [logs, setLogs] = useState([])
   const [wasmReady, setWasmReady] = useState(false)
+  const [elapsedTime, setElapsedTime] = useState(null)
   const workerRef = useRef(null)
+  const startTimeRef = useRef(null)
   const t = STRINGS[lang]
 
   // ── Worker生成 ──
@@ -459,6 +461,12 @@ export default function App() {
         case 'result':
           setResult(e.data.data)
           setStatus('done')
+          {
+            const elapsed = Date.now() - startTimeRef.current
+            const min = Math.floor(elapsed / 60000)
+            const sec = Math.floor((elapsed % 60000) / 1000)
+            setElapsedTime(min > 0 ? `${min}分${sec}秒` : `${sec}秒`)
+          }
           break
         case 'error':
           setLogs(prev => [...prev, `[error] ${e.data.data}`])
@@ -523,6 +531,8 @@ export default function App() {
     const targets = UNIT_TARGETS[unitPref] || ['fighter']
 
     setResultHand({ green: pieces.green, blue: pieces.blue, purple: pieces.purple, gold: pieces.gold, red: pieces.red })
+    startTimeRef.current = Date.now()
+    setElapsedTime(null)
     workerRef.current.postMessage({ type: 'solve', hand, total, targets, lang })
   }
 
@@ -600,6 +610,8 @@ export default function App() {
       )}
 
       {status === 'error' && <div className="no-result">{t.err}</div>}
+
+      {elapsedTime && <div className="elapsed-time">{elapsedTime}で完了</div>}
 
       {status === 'done' && result && (
         result.total === 0

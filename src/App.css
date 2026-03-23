@@ -589,3 +589,10 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+
+.elapsed-time {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
