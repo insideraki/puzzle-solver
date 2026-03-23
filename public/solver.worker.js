@@ -317,7 +317,7 @@ self.onmessage = async (e) => {
         // 緑≥8・金≥7・紫≥8・(赤≥8・青≥2 または 赤≥2・青≥8) の場合
         // F1候補を2通りに固定
         const g = hand[2], pu = hand[3], go = hand[4], r = hand[0], b = hand[1]
-        const totalHand = hand.reduce((a,b) => a+b, 0)
+        const totalHand = hand.reduce((sum, v) => sum + v, 0)
         const isOptimalFixed = g >= 8 && go >= 7 && pu >= 8 &&
           ((r >= 8 && b >= 2) || (r >= 2 && b >= 8))
 
