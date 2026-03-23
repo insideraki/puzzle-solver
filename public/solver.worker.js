@@ -341,7 +341,10 @@ self.onmessage = async (e) => {
           }
         }
 
-        if (isOptimalFixed) {
+        // totalHand < 30 はF1のみ・全量渡す
+        if (totalHand < 30) {
+          combos.push([...hand])
+        } else if (isOptimalFixed) {
           const c1 = [Math.min(r,8), Math.min(b,2), 8, 8, 7]  // 赤優先
           const c2 = [Math.min(r,2), Math.min(b,8), 8, 8, 7]  // 青優先
           combos.push(c1)
