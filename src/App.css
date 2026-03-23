@@ -509,3 +509,83 @@ body {
 .usage-used { color: #d4b85a; font-weight: 600; }
 .usage-sep  { color: #444; }
 .usage-rem  { color: #888; }
+
+/* ---- テンキーポップアップ（モバイル用） ---- */
+.numpad-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.numpad-popup {
+  background: #1a1a1a;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+.numpad-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #eee;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+.numpad-color-dot {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.numpad-color-dot.green  { background: #4caf50; }
+.numpad-color-dot.blue   { background: #2196f3; }
+.numpad-color-dot.purple { background: #9c27b0; }
+.numpad-color-dot.gold   { background: #ffc107; }
+.numpad-color-dot.red    { background: #f44336; }
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.numpad-btn {
+  background: #2e2e2e;
+  color: #eee;
+  border: none;
+  border-radius: 10px;
+  font-size: 22px;
+  padding: 16px;
+  cursor: pointer;
+}
+.numpad-btn:active { background: #B79949; }
+.numpad-back { font-size: 18px; }
+.numpad-actions {
+  display: flex;
+  gap: 10px;
+}
+.numpad-cancel {
+  flex: 1;
+  padding: 14px;
+  background: #333;
+  color: #aaa;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.numpad-confirm {
+  flex: 2;
+  padding: 14px;
+  background: #B79949;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}

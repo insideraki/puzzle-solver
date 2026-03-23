@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 
 const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
 const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
+const isMobile = window.matchMedia('(pointer: coarse)').matches
 
 const STRINGS = {
   ja: {
@@ -399,11 +400,42 @@ function UnitSelector({ value, onChange, t }) {
 }
 
 // ============================================================
+// テンキーポップアップ（モバイル用）
+// ============================================================
+function NumpadPopup({ color, value, onPress, onBackspace, onConfirm, onCancel }) {
+  const colorLabel = { green:'緑', blue:'青', purple:'紫', gold:'金', red:'赤' }
+  return (
+    <div className="numpad-overlay" onClick={onCancel}>
+      <div className="numpad-popup" onClick={e => e.stopPropagation()}>
+        <div className="numpad-header">
+          <span className={`numpad-color-dot ${color}`} />
+          <span>{colorLabel[color]}：{value}</span>
+        </div>
+        <div className="numpad-grid">
+          {[1,2,3,4,5,6,7,8,9].map(n => (
+            <button key={n} className="numpad-btn" onClick={() => onPress(String(n))}>{n}</button>
+          ))}
+          <button className="numpad-btn" onClick={() => onPress('0')}>0</button>
+          <button className="numpad-btn numpad-back" onClick={onBackspace}>⌫</button>
+        </div>
+        <div className="numpad-actions">
+          <button className="numpad-cancel" onClick={onCancel}>キャンセル</button>
+          <button className="numpad-confirm" onClick={onConfirm}>確定</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
 // メインApp
 // ============================================================
 export default function App() {
   const [lang, setLang] = useState('ja')
   const [pieces, setPieces] = useState({ green:0, blue:0, purple:0, gold:0, red:0 })
+  const [numpadTarget, setNumpadTarget] = useState(null)
+  const [numpadInput, setNumpadInput]   = useState('')
+  const [numpadOverwrite, setNumpadOverwrite] = useState(true)
   const [unitPref, setUnitPref] = useState('fighter')
   const [status, setStatus] = useState('idle')
   const [result, setResult] = useState(null)
@@ -444,6 +476,33 @@ export default function App() {
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
+
+  const openNumpad = (color) => {
+    setNumpadTarget(color)
+    setNumpadInput(String(pieces[color]))
+    setNumpadOverwrite(true)
+  }
+  const numpadPress = (digit) => {
+    setNumpadInput(prev => {
+      const base = numpadOverwrite ? '' : prev
+      const next = base + digit
+      const num = parseInt(next)
+      if (num > 20) return prev
+      setNumpadOverwrite(false)
+      return next
+    })
+  }
+  const numpadBackspace = () => {
+    setNumpadOverwrite(false)
+    setNumpadInput(prev => prev.length <= 1 ? '0' : prev.slice(0, -1))
+  }
+  const numpadConfirm = () => {
+    if (numpadTarget) {
+      handleChange(numpadTarget, numpadInput)
+    }
+    setNumpadTarget(null)
+  }
+  const numpadCancel = () => setNumpadTarget(null)
 
   const handleSolve = () => {
     if (!wasmReady || !workerRef.current) return
@@ -491,9 +550,16 @@ export default function App() {
                 className="chest-input"
                 type="number" min="0"
                 value={pieces[color]}
-                onChange={e => handleChange(color, e.target.value)}
+                onChange={e => !isMobile && handleChange(color, e.target.value)}
+                readOnly={isMobile}
               />
-              <div className={`chest-icon ${color}`}><div className="chest-icon-inner" /></div>
+              <div
+                className={`chest-icon ${color}`}
+                onClick={() => isMobile && openNumpad(color)}
+                style={isMobile ? { cursor: 'pointer' } : {}}
+              >
+                <div className="chest-icon-inner" />
+              </div>
             </div>
           ))}
         </div>
@@ -548,6 +614,16 @@ export default function App() {
                 </div>
               </>
             : <Carousel patterns={result.patterns} hand={resultHand} t={t} />
+      )}
+      {isMobile && numpadTarget && (
+        <NumpadPopup
+          color={numpadTarget}
+          value={numpadInput}
+          onPress={numpadPress}
+          onBackspace={numpadBackspace}
+          onConfirm={numpadConfirm}
+          onCancel={numpadCancel}
+        />
       )}
     </div>
   )
