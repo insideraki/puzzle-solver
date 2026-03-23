@@ -553,7 +553,12 @@ export default function App() {
         <div className="chest-label">{t.chest}</div>
         <div className="chest-row">
           {COLORS.map(color => (
-            <div key={color} className="chest-item">
+            <div
+              key={color}
+              className="chest-item"
+              onClick={() => isMobile && openNumpad(color)}
+              style={isMobile ? { cursor: 'pointer' } : {}}
+            >
               <input
                 className="chest-input"
                 type="number" min="0"
@@ -562,11 +567,7 @@ export default function App() {
                 readOnly={isMobile}
                 style={isMobile ? { pointerEvents: 'none' } : {}}
               />
-              <div
-                className={`chest-icon ${color}`}
-                onClick={() => isMobile && openNumpad(color)}
-                style={isMobile ? { cursor: 'pointer' } : {}}
-              >
+              <div className={`chest-icon ${color}`}>
                 <div className="chest-icon-inner" />
               </div>
             </div>
