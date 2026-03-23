@@ -220,7 +220,7 @@ self.onmessage = async (e) => {
 
     const f2Cache = new Map()
     let bestTotal = 0
-    let bestR1 = null, bestR2 = null
+    let bestR1 = null, bestR2 = null, bestF1hand = null
 
     for (const f1hand of combos) {
       const r1 = wasmRunSolver(M, unit, f1hand, null)
@@ -246,10 +246,11 @@ self.onmessage = async (e) => {
         bestTotal = total
         bestR1 = r1
         bestR2 = r2
+        bestF1hand = f1hand
       }
     }
 
-    self.postMessage({ type: 'f1f2_result', bestTotal, bestR1, bestR2 })
+    self.postMessage({ type: 'f1f2_result', bestTotal, bestR1, bestR2, bestF1hand })
     return
   }
 
@@ -359,16 +360,20 @@ self.onmessage = async (e) => {
 
         // 全workerの結果から最大を選ぶ
         let bestTotal = 0
-        let bestR1 = null, bestR2 = null
+        let bestR1 = null, bestR2 = null, bestF1hand = null
         for (const wr of workerResults) {
           if (wr.bestTotal > bestTotal) {
             bestTotal = wr.bestTotal
             bestR1 = wr.bestR1
             bestR2 = wr.bestR2
+            bestF1hand = wr.bestF1hand
           }
         }
 
         log(`[探索] 完了`)
+        if (bestF1hand) {
+          log(`[探索] 最適F1配分: 赤=${bestF1hand[0]} 青=${bestF1hand[1]} 緑=${bestF1hand[2]} 紫=${bestF1hand[3]} 金=${bestF1hand[4]}`)
+        }
 
         if (!bestR1) {
           // 全組み合わせで配置なし
