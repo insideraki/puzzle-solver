@@ -214,6 +214,45 @@ self.onmessage = async (e) => {
     return
   }
 
+  // ── solve_f1f2：sub-workerとしてF1/F2境界値探索を実行 ──
+  if (e.data.type === 'solve_f1f2') {
+    const { unit, hand, combos } = e.data
+
+    const f2Cache = new Map()
+    let bestTotal = 0
+    let bestR1 = null, bestR2 = null
+
+    for (const f1hand of combos) {
+      const r1 = wasmRunSolver(M, unit, f1hand, null)
+      if (r1.power === 0) continue
+
+      const f2hand = hand.map((h, i) => h - f1hand[i])
+      const f2Key = f2hand.join(',')
+
+      let r2
+      if (f2Cache.has(f2Key)) {
+        r2 = f2Cache.get(f2Key)
+      } else {
+        if (f2hand.every(v => v === 0)) {
+          r2 = { power: 0, status_count: 0, field: [], patterns: [] }
+        } else {
+          r2 = wasmRunSolver(M, unit, f2hand, null)
+        }
+        f2Cache.set(f2Key, r2)
+      }
+
+      const total = r1.power + r2.power
+      if (total > bestTotal) {
+        bestTotal = total
+        bestR1 = r1
+        bestR2 = r2
+      }
+    }
+
+    self.postMessage({ type: 'f1f2_result', bestTotal, bestR1, bestR2 })
+    return
+  }
+
   if (e.data.type !== 'solve') return
 
   const { hand, targets, total, lang } = e.data
@@ -293,44 +332,37 @@ self.onmessage = async (e) => {
 
         log(`[探索] 配分候補: ${combos.length}通り`)
 
-        // F2配分キャッシュ（同じF2配分は再計算しない）
-        const f2Cache = new Map()
+        const NUM_WORKERS = 4
+        const chunkSize = Math.ceil(combos.length / NUM_WORKERS)
+        const chunks = []
+        for (let i = 0; i < NUM_WORKERS; i++) {
+          const chunk = combos.slice(i * chunkSize, (i + 1) * chunkSize)
+          if (chunk.length > 0) chunks.push(chunk)
+        }
 
-        let bestTotal = 0
-        let bestR1 = null, bestR2 = null, bestF1hand = null
+        log(`[探索] ${chunks.length}並列で計算中...`)
 
-        for (let i = 0; i < combos.length; i++) {
-          if (i % 50 === 0) log(`[探索] 計算中... ${i+1}/${combos.length}`)
-
-          const f1hand = combos[i]
-
-          // F1計算（[best]ログなし）
-          const r1 = wasmRunSolver(M, unit, f1hand, null)
-          if (r1.power === 0) continue
-
-          // F2配分 = hand - f1hand
-          const f2hand = hand.map((h, i) => h - f1hand[i])
-          const f2Key = f2hand.join(',')
-
-          // F2計算（キャッシュあれば再利用）
-          let r2
-          if (f2Cache.has(f2Key)) {
-            r2 = f2Cache.get(f2Key)
-          } else {
-            if (f2hand.every(v => v === 0)) {
-              r2 = { power: 0, status_count: 0, field: [], patterns: [] }
-            } else {
-              r2 = wasmRunSolver(M, unit, f2hand, null)
+        const workerResults = await Promise.all(chunks.map(chunk => new Promise((resolve, reject) => {
+          const w = new Worker('/solver.worker.js')
+          w.onmessage = (ev) => {
+            if (ev.data.type === 'ready') {
+              w.postMessage({ type: 'solve_f1f2', unit, hand, combos: chunk })
+            } else if (ev.data.type === 'f1f2_result') {
+              resolve(ev.data)
+              w.terminate()
             }
-            f2Cache.set(f2Key, r2)
           }
+          w.onerror = (err) => { reject(err); w.terminate() }
+        })))
 
-          const total = r1.power + r2.power
-          if (total > bestTotal) {
-            bestTotal = total
-            bestR1 = r1
-            bestR2 = r2
-            bestF1hand = f1hand
+        // 全workerの結果から最大を選ぶ
+        let bestTotal = 0
+        let bestR1 = null, bestR2 = null
+        for (const wr of workerResults) {
+          if (wr.bestTotal > bestTotal) {
+            bestTotal = wr.bestTotal
+            bestR1 = wr.bestR1
+            bestR2 = wr.bestR2
           }
         }
 
