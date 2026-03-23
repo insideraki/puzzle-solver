@@ -313,6 +313,13 @@ self.onmessage = async (e) => {
           return [...new Set([0, 4, 7, 8, n].filter(v => v <= n))]
         }
 
+        // 最強配置確定条件チェック
+        // 緑≥8・金≥7・紫≥8・(赤≥8・青≥2 または 赤≥2・青≥8) の場合
+        // F1候補を2通りに固定
+        const g = hand[2], pu = hand[3], go = hand[4], r = hand[0], b = hand[1]
+        const isOptimalFixed = g >= 8 && go >= 7 && pu >= 8 &&
+          ((r >= 8 && b >= 2) || (r >= 2 && b >= 8))
+
         // 5色の全組み合わせ列挙
         // hand = [red, blue, green, purple, gold]
         const boundaries = hand.map(n => getBoundaries(n))
@@ -333,7 +340,16 @@ self.onmessage = async (e) => {
             enumerate(idx + 1, current)
           }
         }
-        enumerate(0, [0,0,0,0,0])
+
+        if (isOptimalFixed) {
+          const c1 = [Math.min(r,8), Math.min(b,2), 8, 8, 7]  // 赤優先
+          const c2 = [Math.min(r,2), Math.min(b,8), 8, 8, 7]  // 青優先
+          // 赤↔青対称：赤>青はスキップ（既存ロジックと統一）
+          combos.push(c1)
+          if (c1[0] !== c2[0]) combos.push(c2)
+        } else {
+          enumerate(0, [0,0,0,0,0])
+        }
 
         log(`[探索] 配分候補: ${combos.length}通り`)
 
