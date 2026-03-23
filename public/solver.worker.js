@@ -264,66 +264,102 @@ self.onmessage = async (e) => {
         allPatterns.sort((a, b) => b.power - a.power)
         patterns = allPatterns
       } else {
-        // ── 逐次計算（単一兵種モード） ──
-        let bestUnit = null, bestR1 = null
-        for (const unit of targets) {
-          const label = S.unit[unit] || unit
-          log(S.skill1_start(label))
-          const r = wasmRunSolver(M, unit, hand, makeOnLog())
-          if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
-          if (r.power > 0) {
-            log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
+        // ── 逐次計算（単一兵種モード）：F1/F2配分境界値探索 ──
+        const unit = targets[0]
+        const label = S.unit[unit] || unit
+
+        // 境界値候補生成
+        function getBoundaries(n) {
+          return [...new Set([0, 4, 7, 8, n].filter(v => v <= n))]
+        }
+
+        // 5色の全組み合わせ列挙
+        // hand = [red, blue, green, purple, gold]
+        const boundaries = hand.map(n => getBoundaries(n))
+        const combos = []
+        function enumerate(idx, current) {
+          if (idx === 5) {
+            // 全色0はスキップ
+            if (current.every(v => v === 0)) return
+            combos.push([...current])
+            return
+          }
+          for (const v of boundaries[idx]) {
+            current[idx] = v
+            enumerate(idx + 1, current)
+          }
+        }
+        enumerate(0, [0,0,0,0,0])
+
+        log(`[探索] 配分候補: ${combos.length}通り`)
+
+        // F2配分キャッシュ（同じF2配分は再計算しない）
+        const f2Cache = new Map()
+
+        let bestTotal = 0
+        let bestR1 = null, bestR2 = null, bestF1hand = null
+
+        for (let i = 0; i < combos.length; i++) {
+          if (i % 50 === 0) log(`[探索] 計算中... ${i+1}/${combos.length}`)
+
+          const f1hand = combos[i]
+
+          // F1計算（[best]ログなし）
+          const r1 = wasmRunSolver(M, unit, f1hand, null)
+          if (r1.power === 0) continue
+
+          // F2配分 = hand - f1hand
+          const f2hand = hand.map((h, i) => h - f1hand[i])
+          const f2Key = f2hand.join(',')
+
+          // F2計算（キャッシュあれば再利用）
+          let r2
+          if (f2Cache.has(f2Key)) {
+            r2 = f2Cache.get(f2Key)
           } else {
-            log(S.skill1_none(label))
+            if (f2hand.every(v => v === 0)) {
+              r2 = { power: 0, status_count: 0, field: [], patterns: [] }
+            } else {
+              r2 = wasmRunSolver(M, unit, f2hand, null)
+            }
+            f2Cache.set(f2Key, r2)
+          }
+
+          const total = r1.power + r2.power
+          if (total > bestTotal) {
+            bestTotal = total
+            bestR1 = r1
+            bestR2 = r2
+            bestF1hand = f1hand
           }
         }
 
-        if (bestR1 && bestR1.power > 0) {
-          const bestLabel = S.unit[bestUnit] || bestUnit
-          log(S.skill1_adopt(bestLabel, bestR1.power.toLocaleString()))
+        log(`[探索] 完了`)
 
-          const used      = [0,0,0,0,0]
-          for (const c of bestR1.field) if (c >= 0) used[c]++
-          const remaining = hand.map((h,i) => h - used[i])
-
-          log(S.skill2_rest(remaining))
-
-          if (remaining.every(v => v === 0)) {
-            log(S.skill2_none())
-            patterns = [{
-              power:        bestR1.power,
-              status_count: bestR1.status_count,
-              fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
-              buffs:        calcBuffs(bestR1.patterns),
-            }]
-          } else {
-            log(S.skill2_start(bestLabel))
-
-            const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
-
-            if (r2.power === 0) {
-              log(S.skill2_none())
-              patterns = [{
-                power:        bestR1.power,
-                status_count: bestR1.status_count,
-                fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
-                buffs:        calcBuffs(bestR1.patterns),
-              }]
-            } else {
-              const totalPower = bestR1.power + r2.power
-              log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
-              log(S.total(totalPower.toLocaleString()))
-              patterns = [{
-                power:        totalPower,
-                status_count: bestR1.status_count + r2.status_count,
-                fields: [
-                  { key:'skill1', field: convertField(bestR1.field) },
-                  { key:'skill2', field: convertField(r2.field) },
-                ],
-                buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
-              }]
-            }
-          }
+        if (!bestR1) {
+          // 全組み合わせで配置なし
+          patterns = []
+        } else if (bestR2 && bestR2.power > 0) {
+          log(S.skill1_done(label, bestR1.power.toLocaleString(), bestR1.status_count))
+          log(S.skill2_done(bestR2.power.toLocaleString(), bestR2.status_count))
+          log(S.total(bestTotal.toLocaleString()))
+          patterns = [{
+            power:        bestTotal,
+            status_count: bestR1.status_count + bestR2.status_count,
+            fields: [
+              { key:'skill1', field: convertField(bestR1.field) },
+              { key:'skill2', field: convertField(bestR2.field) },
+            ],
+            buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(bestR2.patterns)),
+          }]
+        } else {
+          log(S.skill1_done(label, bestR1.power.toLocaleString(), bestR1.status_count))
+          patterns = [{
+            power:        bestR1.power,
+            status_count: bestR1.status_count,
+            fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
+            buffs:        calcBuffs(bestR1.patterns),
+          }]
         }
       }
     }
