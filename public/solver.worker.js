@@ -323,6 +323,8 @@ self.onmessage = async (e) => {
             if (current.every(v => v === 0)) return
             // 赤(index 0)>青(index 1)の場合はスキップ（赤↔青対称）
             if (current[0] > current[1]) return
+            // F1合計が33を超える場合はスキップ（最強配置は33個が上限）
+            if (current.reduce((a,b) => a+b, 0) > 33) return
             combos.push([...current])
             return
           }
