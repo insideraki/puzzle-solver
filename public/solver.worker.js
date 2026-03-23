@@ -183,10 +183,17 @@ function wasmRunSolver(M, unit, hand, onLog) {
 // WASMロード
 // ============================================================
 let M = null
+let pendingSingle = null
 self.Module = {
   onRuntimeInitialized() {
     M = self.Module
     self.postMessage({ type: 'ready' })
+    if (pendingSingle) {
+      const { unit, hand } = pendingSingle
+      pendingSingle = null
+      const result = wasmRunSolver(M, unit, hand, null)
+      self.postMessage({ type: 'single_result', unit, result })
+    }
   }
 }
 importScripts('/solver.js')
@@ -194,7 +201,19 @@ importScripts('/solver.js')
 // ============================================================
 // メッセージ受信・ソルバー実行
 // ============================================================
-self.onmessage = (e) => {
+self.onmessage = async (e) => {
+  // ── solve_single：sub-workerとして1兵種のskill1を計算 ──
+  if (e.data.type === 'solve_single') {
+    const { unit, hand } = e.data
+    if (M) {
+      const result = wasmRunSolver(M, unit, hand, null)
+      self.postMessage({ type: 'single_result', unit, result })
+    } else {
+      pendingSingle = { unit, hand }
+    }
+    return
+  }
+
   if (e.data.type !== 'solve') return
 
   const { hand, targets, total, lang } = e.data
@@ -211,15 +230,45 @@ self.onmessage = (e) => {
     {
       // ── 常に2フィールド計算（特技2が組めない場合は特技1のみ） ──
       let bestUnit = null, bestR1 = null
-      for (const unit of targets) {
-        const label = S.unit[unit] || unit
-        log(S.skill1_start(label))
-        const r = wasmRunSolver(M, unit, hand, makeOnLog())
-        if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
-        if (r.power > 0) {
-          log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
-        } else {
-          log(S.skill1_none(label))
+
+      if (targets.length > 1) {
+        // ── 並列計算（戦力重視モード） ──
+        for (const unit of targets) log(S.skill1_start(S.unit[unit] || unit))
+
+        const unitResults = await Promise.all(targets.map(unit => new Promise((resolve, reject) => {
+          const w = new Worker('/solver.worker.js')
+          w.onmessage = (ev) => {
+            if (ev.data.type === 'ready') {
+              w.postMessage({ type: 'solve_single', unit, hand })
+            } else if (ev.data.type === 'single_result') {
+              resolve({ unit, result: ev.data.result })
+              w.terminate()
+            }
+          }
+          w.onerror = (err) => { reject(err); w.terminate() }
+        })))
+
+        for (const { unit, result: r } of unitResults) {
+          const label = S.unit[unit] || unit
+          if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
+          if (r.power > 0) {
+            log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
+          } else {
+            log(S.skill1_none(label))
+          }
+        }
+      } else {
+        // ── 逐次計算（単一兵種モード） ──
+        for (const unit of targets) {
+          const label = S.unit[unit] || unit
+          log(S.skill1_start(label))
+          const r = wasmRunSolver(M, unit, hand, makeOnLog())
+          if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
+          if (r.power > 0) {
+            log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
+          } else {
+            log(S.skill1_none(label))
+          }
         }
       }
 
@@ -242,34 +291,33 @@ self.onmessage = (e) => {
             buffs:        calcBuffs(bestR1.patterns),
           }]
         } else {
+          log(S.skill2_start(bestLabel))
 
-        log(S.skill2_start(bestLabel))
+          const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
 
-        const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
-
-        if (r2.power === 0) {
-          log(S.skill2_none())
-          patterns = [{
-            power:        bestR1.power,
-            status_count: bestR1.status_count,
-            fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
-            buffs:        calcBuffs(bestR1.patterns),
-          }]
-        } else {
-          const totalPower = bestR1.power + r2.power
-          log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
-          log(S.total(totalPower.toLocaleString()))
-          patterns = [{
-            power:        totalPower,
-            status_count: bestR1.status_count + r2.status_count,
-            fields: [
-              { key:'skill1', field: convertField(bestR1.field) },
-              { key:'skill2', field: convertField(r2.field) },
-            ],
-            buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
-          }]
+          if (r2.power === 0) {
+            log(S.skill2_none())
+            patterns = [{
+              power:        bestR1.power,
+              status_count: bestR1.status_count,
+              fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
+              buffs:        calcBuffs(bestR1.patterns),
+            }]
+          } else {
+            const totalPower = bestR1.power + r2.power
+            log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
+            log(S.total(totalPower.toLocaleString()))
+            patterns = [{
+              power:        totalPower,
+              status_count: bestR1.status_count + r2.status_count,
+              fields: [
+                { key:'skill1', field: convertField(bestR1.field) },
+                { key:'skill2', field: convertField(r2.field) },
+              ],
+              buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
+            }]
+          }
         }
-        } // end else (remaining not all zero)
       }
     }
 
