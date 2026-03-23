@@ -9,6 +9,7 @@ const STRINGS = {
     chest: '手持ちチェス',
     unitPref: '兵種選択',
     unitHint: '自軍の主力兵種を選ぶと速く最適化できます',
+    unit: { fighter:'ファイター', shooter:'シューター', rider:'ライダー' },
     search: '最適配置を探索',
     found: 'パターンの最適配置が見つかりました',
     of: '/',
@@ -34,6 +35,7 @@ const STRINGS = {
     chest: 'Chess Pieces',
     unitPref: 'Unit Type',
     unitHint: 'Select your main unit for faster results',
+    unit: { fighter:'Fighter', shooter:'Shooter', rider:'Rider' },
     search: 'Find Optimal Setup',
     found: 'optimal pattern(s) found',
     of: '/',
@@ -59,6 +61,7 @@ const STRINGS = {
     chest: '棋子数量',
     unitPref: '兵种偏好',
     unitHint: '选择主力兵种可加快优化速度',
+    unit: { fighter:'近战兵', shooter:'射击兵', rider:'骑乘兵' },
     search: '搜索最优配置',
     found: '找到最优配置',
     of: '/',
@@ -84,6 +87,7 @@ const STRINGS = {
     chest: 'Шахматные фигуры',
     unitPref: 'Тип войска',
     unitHint: 'Выберите тип для ускорения расчёта',
+    unit: { fighter:'Боец', shooter:'Стрелок', rider:'Всадник' },
     search: 'Найти оптимум',
     found: 'вариантов найдено',
     of: '/',
@@ -338,6 +342,9 @@ function Carousel({ patterns, hand, t }) {
   return (
     <>
       <div className="pattern-msg">
+        {p.unit && t.unit?.[p.unit] && (
+          <div className="unit-badge">{t.unit[p.unit]}</div>
+        )}
         <span>{total}</span> {t.found}・{current + 1} {t.of} {total}
       </div>
       <div className="carousel-wrap">
@@ -524,6 +531,9 @@ export default function App() {
           : result.total === 1
             ? <>
                 <div className="pattern-msg">
+                  {result.patterns[0].unit && t.unit?.[result.patterns[0].unit] && (
+                    <div className="unit-badge">{t.unit[result.patterns[0].unit]}</div>
+                  )}
                   <span>1</span> {t.found}
                   <br /><small style={{ color: '#555' }}>{t.hint}</small>
                 </div>

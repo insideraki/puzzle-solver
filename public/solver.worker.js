@@ -228,11 +228,8 @@ self.onmessage = async (e) => {
     }
 
     {
-      // ── 常に2フィールド計算（特技2が組めない場合は特技1のみ） ──
-      let bestUnit = null, bestR1 = null
-
       if (targets.length > 1) {
-        // ── 並列計算（戦力重視モード） ──
+        // ── 並列計算（戦力重視モード）：skill1のみ、全兵種をpower降順で返す ──
         for (const unit of targets) log(S.skill1_start(S.unit[unit] || unit))
 
         const unitResults = await Promise.all(targets.map(unit => new Promise((resolve, reject) => {
@@ -248,17 +245,27 @@ self.onmessage = async (e) => {
           w.onerror = (err) => { reject(err); w.terminate() }
         })))
 
+        const allPatterns = []
         for (const { unit, result: r } of unitResults) {
           const label = S.unit[unit] || unit
-          if (!bestR1 || r.power > bestR1.power) { bestR1 = r; bestUnit = unit }
           if (r.power > 0) {
             log(S.skill1_done(label, r.power.toLocaleString(), r.status_count))
+            allPatterns.push({
+              unit,
+              power:        r.power,
+              status_count: r.status_count,
+              fields:       [{ key: 'skill1', field: convertField(r.field) }],
+              buffs:        calcBuffs(r.patterns),
+            })
           } else {
             log(S.skill1_none(label))
           }
         }
+        allPatterns.sort((a, b) => b.power - a.power)
+        patterns = allPatterns
       } else {
         // ── 逐次計算（単一兵種モード） ──
+        let bestUnit = null, bestR1 = null
         for (const unit of targets) {
           const label = S.unit[unit] || unit
           log(S.skill1_start(label))
@@ -270,32 +277,18 @@ self.onmessage = async (e) => {
             log(S.skill1_none(label))
           }
         }
-      }
 
-      if (bestR1 && bestR1.power > 0) {
-        const bestLabel = S.unit[bestUnit] || bestUnit
-        log(S.skill1_adopt(bestLabel, bestR1.power.toLocaleString()))
+        if (bestR1 && bestR1.power > 0) {
+          const bestLabel = S.unit[bestUnit] || bestUnit
+          log(S.skill1_adopt(bestLabel, bestR1.power.toLocaleString()))
 
-        const used      = [0,0,0,0,0]
-        for (const c of bestR1.field) if (c >= 0) used[c]++
-        const remaining = hand.map((h,i) => h - used[i])
+          const used      = [0,0,0,0,0]
+          for (const c of bestR1.field) if (c >= 0) used[c]++
+          const remaining = hand.map((h,i) => h - used[i])
 
-        log(S.skill2_rest(remaining))
+          log(S.skill2_rest(remaining))
 
-        if (remaining.every(v => v === 0)) {
-          log(S.skill2_none())
-          patterns = [{
-            power:        bestR1.power,
-            status_count: bestR1.status_count,
-            fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
-            buffs:        calcBuffs(bestR1.patterns),
-          }]
-        } else {
-          log(S.skill2_start(bestLabel))
-
-          const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
-
-          if (r2.power === 0) {
+          if (remaining.every(v => v === 0)) {
             log(S.skill2_none())
             patterns = [{
               power:        bestR1.power,
@@ -304,18 +297,32 @@ self.onmessage = async (e) => {
               buffs:        calcBuffs(bestR1.patterns),
             }]
           } else {
-            const totalPower = bestR1.power + r2.power
-            log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
-            log(S.total(totalPower.toLocaleString()))
-            patterns = [{
-              power:        totalPower,
-              status_count: bestR1.status_count + r2.status_count,
-              fields: [
-                { key:'skill1', field: convertField(bestR1.field) },
-                { key:'skill2', field: convertField(r2.field) },
-              ],
-              buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
-            }]
+            log(S.skill2_start(bestLabel))
+
+            const r2 = wasmRunSolver(M, bestUnit, remaining, makeOnLog())
+
+            if (r2.power === 0) {
+              log(S.skill2_none())
+              patterns = [{
+                power:        bestR1.power,
+                status_count: bestR1.status_count,
+                fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
+                buffs:        calcBuffs(bestR1.patterns),
+              }]
+            } else {
+              const totalPower = bestR1.power + r2.power
+              log(S.skill2_done(r2.power.toLocaleString(), r2.status_count))
+              log(S.total(totalPower.toLocaleString()))
+              patterns = [{
+                power:        totalPower,
+                status_count: bestR1.status_count + r2.status_count,
+                fields: [
+                  { key:'skill1', field: convertField(bestR1.field) },
+                  { key:'skill2', field: convertField(r2.field) },
+                ],
+                buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(r2.patterns)),
+              }]
+            }
           }
         }
       }
