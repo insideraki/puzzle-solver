@@ -332,7 +332,7 @@ self.onmessage = async (e) => {
 
         log(`[探索] 配分候補: ${combos.length}通り`)
 
-        const NUM_WORKERS = 4
+        const NUM_WORKERS = 8
         const chunkSize = Math.ceil(combos.length / NUM_WORKERS)
         const chunks = []
         for (let i = 0; i < NUM_WORKERS; i++) {
