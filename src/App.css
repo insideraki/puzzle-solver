@@ -334,6 +334,12 @@ body {
   flex: 1;
   text-align: center;
 }
+.title-sub {
+  font-size: 10px;
+  color: #888;
+  font-weight: 400;
+  margin-top: 2px;
+}
 .lang-select {
   background: #1a1a1a;
   border: 1px solid #333;

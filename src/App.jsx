@@ -550,7 +550,7 @@ export default function App() {
     <div className="app">
       <div className="header">
         <div className="title">
-          {t.title.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+          {t.title.split('\n').map((line, i) => <div key={i} className={i === 2 ? 'title-sub' : ''}>{line}</div>)}
         </div>
         <select className="lang-select" value={lang} onChange={e => setLang(e.target.value)}>
           <option value="ja">日本語</option>
