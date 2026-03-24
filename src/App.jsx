@@ -34,6 +34,10 @@ const STRINGS = {
     searchNote: '組み合わせによっては数分かかることがあります。\n計算中は中止できます。',
     close: '閉じる',
     tapToContinue: 'タップして続ける',
+    colors: { green:'緑', blue:'青', purple:'紫', gold:'金', red:'赤' },
+    numpad_cancel: 'キャンセル',
+    numpad_confirm: '確定',
+    numpad_next: '確定→次へ',
   },
   en: {
     title: 'Puzzle & Survival\nHero Specialty Optimizer',
@@ -64,6 +68,10 @@ const STRINGS = {
     searchNote: 'Some combinations may take a few minutes.\nYou can cancel anytime.',
     close: 'Close',
     tapToContinue: 'Tap to continue',
+    colors: { green:'Green', blue:'Blue', purple:'Purple', gold:'Gold', red:'Red' },
+    numpad_cancel: 'Cancel',
+    numpad_confirm: 'OK',
+    numpad_next: 'OK → Next',
   },
   zh: {
     title: '末日喧嚣\n英雄专长优化器',
@@ -95,6 +103,10 @@ const STRINGS = {
     searchNote: '部分组合可能需要数分钟。\n计算中可随时取消。',
     close: '关闭',
     tapToContinue: '点击继续',
+    colors: { green:'绿', blue:'蓝', purple:'紫', gold:'金', red:'红' },
+    numpad_cancel: '取消',
+    numpad_confirm: '确定',
+    numpad_next: '确定→下一个',
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
@@ -125,6 +137,10 @@ const STRINGS = {
     searchNote: 'Некоторые комбинации могут занять несколько минут.\nМожно отменить.',
     close: 'Закрыть',
     tapToContinue: 'Нажмите, чтобы продолжить',
+    colors: { green:'Зелёный', blue:'Синий', purple:'Фиолетовый', gold:'Золотой', red:'Красный' },
+    numpad_cancel: 'Отмена',
+    numpad_confirm: 'ОК',
+    numpad_next: 'ОК → Далее',
   },
 }
 
@@ -443,14 +459,13 @@ function UnitSelector({ value, onChange, t }) {
 // ============================================================
 // テンキーポップアップ（モバイル用）
 // ============================================================
-function NumpadPopup({ color, value, onPress, onBackspace, onConfirm, onCancel }) {
-  const colorLabel = { green:'緑', blue:'青', purple:'紫', gold:'金', red:'赤' }
+function NumpadPopup({ color, value, onPress, onBackspace, onConfirm, onCancel, t }) {
   return (
     <div className="numpad-overlay" onClick={onCancel}>
       <div className="numpad-popup" onClick={e => e.stopPropagation()}>
         <div className="numpad-header">
           <span className={`numpad-color-dot ${color}`} />
-          <span>{colorLabel[color]}：{value}</span>
+          <span>{t.colors[color]}：{value}</span>
         </div>
         <div className="numpad-grid">
           {[1,2,3,4,5,6,7,8,9].map(n => (
@@ -460,8 +475,8 @@ function NumpadPopup({ color, value, onPress, onBackspace, onConfirm, onCancel }
           <button className="numpad-btn numpad-back" onClick={onBackspace}>⌫</button>
         </div>
         <div className="numpad-actions">
-          <button className="numpad-cancel" onClick={onCancel}>キャンセル</button>
-          <button className="numpad-confirm" onClick={onConfirm}>{color === 'red' ? '確定' : '確定→次へ'}</button>
+          <button className="numpad-cancel" onClick={onCancel}>{t.numpad_cancel}</button>
+          <button className="numpad-confirm" onClick={onConfirm}>{color === 'red' ? t.numpad_confirm : t.numpad_next}</button>
         </div>
       </div>
     </div>
@@ -695,6 +710,7 @@ export default function App() {
           onBackspace={numpadBackspace}
           onConfirm={numpadConfirm}
           onCancel={numpadCancel}
+          t={t}
         />
       )}
       {showAdModal && <AdModal onClose={() => setShowAdModal(false)} t={t} />}
