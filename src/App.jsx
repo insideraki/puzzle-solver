@@ -343,9 +343,6 @@ function Carousel({ patterns, hand, t }) {
   return (
     <>
       <div className="pattern-msg">
-        {p.unit && t.unit?.[p.unit] && (
-          <div className="unit-badge">{t.unit[p.unit]}</div>
-        )}
         <span>{total}</span> {t.found}・{current + 1} {t.of} {total}
       </div>
       <div className="carousel-wrap">
@@ -528,7 +525,7 @@ export default function App() {
 
     const hand    = [pieces.red, pieces.blue, pieces.green, pieces.purple, pieces.gold]
     const total   = hand.reduce((a,b) => a+b, 0)
-    const targets = UNIT_TARGETS[unitPref] || ['fighter']
+    const targets = ['fighter']
 
     setResultHand({ green: pieces.green, blue: pieces.blue, purple: pieces.purple, gold: pieces.gold, red: pieces.red })
     startTimeRef.current = Date.now()
@@ -584,8 +581,6 @@ export default function App() {
           ))}
         </div>
 
-        <UnitSelector value={unitPref} onChange={setUnitPref} t={t} />
-
         <div className="search-btn-wrap">
           {status === 'loading' ? (
             <button className="search-btn" onClick={handleCancel}>
@@ -619,9 +614,6 @@ export default function App() {
           : result.total === 1
             ? <>
                 <div className="pattern-msg">
-                  {result.patterns[0].unit && t.unit?.[result.patterns[0].unit] && (
-                    <div className="unit-badge">{t.unit[result.patterns[0].unit]}</div>
-                  )}
                   <span>1</span> {t.found}
                   <br /><small style={{ color: '#555' }}>{t.hint}</small>
                 </div>

@@ -223,6 +223,8 @@ self.onmessage = async (e) => {
     let bestR1 = null, bestR2 = null, bestF1hand = null
 
     for (const f1hand of combos) {
+      self.postMessage({ type: 'f1f2_progress' })
+
       const r1 = wasmRunSolver(M, unit, f1hand, null)
       if (r1.power === 0) continue
 
@@ -247,6 +249,7 @@ self.onmessage = async (e) => {
         bestR1 = r1
         bestR2 = r2
         bestF1hand = f1hand
+        self.postMessage({ type: 'f1f2_best', power: bestTotal })
       }
     }
 
@@ -367,11 +370,21 @@ self.onmessage = async (e) => {
 
         log(`[探索] ${chunks.length}並列で計算中...`)
 
+        let doneCount = 0
+        let bestLiveTotal = 0
         const workerResults = await Promise.all(chunks.map(chunk => new Promise((resolve, reject) => {
           const w = new Worker('/solver.worker.js')
           w.onmessage = (ev) => {
             if (ev.data.type === 'ready') {
               w.postMessage({ type: 'solve_f1f2', unit, hand, combos: chunk })
+            } else if (ev.data.type === 'f1f2_progress') {
+              doneCount++
+              log(`[進捗] ${doneCount}/${combos.length}`)
+            } else if (ev.data.type === 'f1f2_best') {
+              if (ev.data.power > bestLiveTotal) {
+                bestLiveTotal = ev.data.power
+                log(`⚡ 最高戦力更新: +${ev.data.power.toLocaleString()}`)
+              }
             } else if (ev.data.type === 'f1f2_result') {
               resolve(ev.data)
               w.terminate()
