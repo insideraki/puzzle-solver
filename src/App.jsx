@@ -31,6 +31,7 @@ const STRINGS = {
     loading_wasm: 'ソルバーを読み込み中...',
     cancel: '計算を中止',
     searchNote: '組み合わせによっては数分かかることがあります。\n計算中は中止できます。',
+    close: '閉じる',
   },
   en: {
     title: 'Puzzle & Survival\nHero Specialty Optimizer',
@@ -58,6 +59,7 @@ const STRINGS = {
     loading_wasm: 'Loading solver...',
     cancel: 'Cancel',
     searchNote: 'Some combinations may take a few minutes.\nYou can cancel anytime.',
+    close: 'Close',
   },
   zh: {
     title: '末日喧嚣\n英雄专长优化器',
@@ -85,6 +87,7 @@ const STRINGS = {
     loading_wasm: '加载求解器...',
     cancel: '取消计算',
     searchNote: '部分组合可能需要数分钟。\n计算中可随时取消。',
+    close: '关闭',
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
@@ -112,7 +115,38 @@ const STRINGS = {
     loading_wasm: 'Загрузка решателя...',
     cancel: 'Отменить',
     searchNote: 'Некоторые комбинации могут занять несколько минут.\nМожно отменить.',
+    close: 'Закрыть',
   },
+}
+
+// ============================================================
+// 広告（AdSense承認後にここを差し替え）
+// ============================================================
+const AD_SCRIPT_SRC = 'https://pl28969529.profitablecpmratenetwork.com/dd/4f/4f/dd4f4f1cc98dfd378535b04826ecb348.js'
+let adScriptInserted = false
+
+function AdComponent() {
+  const containerRef = useRef(null)
+  useEffect(() => {
+    if (adScriptInserted || !containerRef.current) return
+    adScriptInserted = true
+    const script = document.createElement('script')
+    script.src = AD_SCRIPT_SRC
+    script.async = true
+    containerRef.current.appendChild(script)
+  }, [])
+  return <div ref={containerRef} />
+}
+
+function AdModal({ onClose, t }) {
+  return (
+    <div className="ad-modal-overlay" onClick={onClose}>
+      <div className="ad-modal-content" onClick={e => e.stopPropagation()}>
+        <AdComponent />
+        <button className="ad-modal-close" onClick={onClose}>{t.close}</button>
+      </div>
+    </div>
+  )
 }
 
 // ============================================================
@@ -444,9 +478,15 @@ export default function App() {
   const [logs, setLogs] = useState([])
   const [wasmReady, setWasmReady] = useState(false)
   const [elapsedTime, setElapsedTime] = useState(null)
+  const [calcCount, setCalcCount] = useState(0)
+  const [showAdModal, setShowAdModal] = useState(false)
   const workerRef = useRef(null)
   const startTimeRef = useRef(null)
   const t = STRINGS[lang]
+
+  useEffect(() => {
+    if (calcCount > 0 && calcCount % 3 === 0) setShowAdModal(true)
+  }, [calcCount])
 
   // ── Worker生成 ──
   const createWorker = useCallback(() => {
@@ -462,6 +502,7 @@ export default function App() {
         case 'result':
           setResult(e.data.data)
           setStatus('done')
+          setCalcCount(prev => prev + 1)
           {
             const elapsed = Date.now() - startTimeRef.current
             const min = Math.floor(elapsed / 60000)
@@ -644,6 +685,7 @@ export default function App() {
           onCancel={numpadCancel}
         />
       )}
+      {showAdModal && <AdModal onClose={() => setShowAdModal(false)} t={t} />}
     </div>
   )
 }

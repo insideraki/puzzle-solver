@@ -598,6 +598,40 @@ body {
   margin-bottom: 8px;
 }
 
+/* ---- 広告モーダル ---- */
+.ad-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ad-modal-content {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 20px;
+  width: 320px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.ad-modal-close {
+  padding: 8px 32px;
+  background: #1e1808;
+  border: 1px solid #B79949;
+  color: #d4b85a;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.ad-modal-close:hover { background: #2a2210; }
+
 .search-note {
   font-size: 0.75rem;
   color: #888;
