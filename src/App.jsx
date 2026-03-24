@@ -6,7 +6,7 @@ const isMobile = window.matchMedia('(pointer: coarse)').matches
 
 const STRINGS = {
   ja: {
-    title: 'HERO OPTIMIZER\nパズル&サバイバル 英雄特技\n手持ちチェスから最強の配置を導き出します',
+    title: 'HERO OPTIMIZER\nパズル&サバイバル 英雄特技',
     chest: '手持ちチェス',
     unitPref: '兵種選択',
     unitHint: '自軍の主力兵種を選ぶと速く最適化できます',
