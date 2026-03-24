@@ -126,7 +126,7 @@ const STRINGS = {
 // ============================================================
 // 広告（AdSense承認後にAD_URLを差し替え）
 // ============================================================
-const AD_URL = 'https://pl28969529.profitablecpmratenetwork.com/dd/4f/4f/dd4f4f1cc98dfd378535b04826ecb348.js'
+const AD_URL = 'https://www.profitablecpmratenetwork.com/sn0mpgwj2x?key=4a8d1a4f4222abf3b72975b9ea01ff02'
 
 function AdModal({ onClose, t }) {
   const handleTap = () => {
