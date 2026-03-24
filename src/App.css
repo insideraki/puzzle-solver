@@ -612,25 +612,19 @@ body {
   background: #1a1a1a;
   border: 1px solid #333;
   border-radius: 12px;
-  padding: 20px;
+  padding: 32px 24px;
   width: 320px;
   max-width: 90vw;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-}
-.ad-modal-close {
-  padding: 8px 32px;
-  background: #1e1808;
-  border: 1px solid #B79949;
-  color: #d4b85a;
-  border-radius: 8px;
-  font-size: 14px;
   cursor: pointer;
-  letter-spacing: 0.04em;
 }
-.ad-modal-close:hover { background: #2a2210; }
+.ad-modal-tap {
+  font-size: 15px;
+  color: #d4b85a;
+  letter-spacing: 0.05em;
+}
 
 .search-note {
   font-size: 0.75rem;

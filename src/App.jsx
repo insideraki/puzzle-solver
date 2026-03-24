@@ -32,6 +32,7 @@ const STRINGS = {
     cancel: '計算を中止',
     searchNote: '組み合わせによっては数分かかることがあります。\n計算中は中止できます。',
     close: '閉じる',
+    tapToContinue: 'タップして続ける',
   },
   en: {
     title: 'Puzzle & Survival\nHero Specialty Optimizer',
@@ -60,6 +61,7 @@ const STRINGS = {
     cancel: 'Cancel',
     searchNote: 'Some combinations may take a few minutes.\nYou can cancel anytime.',
     close: 'Close',
+    tapToContinue: 'Tap to continue',
   },
   zh: {
     title: '末日喧嚣\n英雄专长优化器',
@@ -88,6 +90,7 @@ const STRINGS = {
     cancel: '取消计算',
     searchNote: '部分组合可能需要数分钟。\n计算中可随时取消。',
     close: '关闭',
+    tapToContinue: '点击继续',
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
@@ -116,6 +119,7 @@ const STRINGS = {
     cancel: 'Отменить',
     searchNote: 'Некоторые комбинации могут занять несколько минут.\nМожно отменить.',
     close: 'Закрыть',
+    tapToContinue: 'Нажмите, чтобы продолжить',
   },
 }
 
@@ -125,14 +129,14 @@ const STRINGS = {
 const AD_URL = 'https://pl28969529.profitablecpmratenetwork.com/dd/4f/4f/dd4f4f1cc98dfd378535b04826ecb348.js'
 
 function AdModal({ onClose, t }) {
-  const handleClose = () => {
+  const handleTap = () => {
     window.open(AD_URL, '_blank')
     onClose()
   }
   return (
-    <div className="ad-modal-overlay" onClick={handleClose}>
-      <div className="ad-modal-content" onClick={e => e.stopPropagation()}>
-        <button className="ad-modal-close" onClick={handleClose}>{t.close}</button>
+    <div className="ad-modal-overlay" onClick={handleTap}>
+      <div className="ad-modal-content">
+        <div className="ad-modal-tap">{t.tapToContinue}</div>
       </div>
     </div>
   )
