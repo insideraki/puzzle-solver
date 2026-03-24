@@ -145,25 +145,6 @@ const STRINGS = {
 }
 
 // ============================================================
-// 広告（AdSense承認後にAD_URLを差し替え）
-// ============================================================
-const AD_URL = 'https://www.profitablecpmratenetwork.com/sn0mpgwj2x?key=4a8d1a4f4222abf3b72975b9ea01ff02'
-
-function AdModal({ onClose, t }) {
-  const handleTap = () => {
-    window.open(AD_URL, '_blank')
-    onClose()
-  }
-  return (
-    <div className="ad-modal-overlay" onClick={handleTap}>
-      <div className="ad-modal-content">
-        <div className="ad-modal-tap">{t.tapToContinue}</div>
-      </div>
-    </div>
-  )
-}
-
-// ============================================================
 // ゲームデータ
 // ============================================================
 const BUFFS = {
@@ -505,15 +486,9 @@ export default function App() {
   const [logs, setLogs] = useState([])
   const [wasmReady, setWasmReady] = useState(false)
   const [elapsedTime, setElapsedTime] = useState(null)
-  const [calcCount, setCalcCount] = useState(0)
-  const [showAdModal, setShowAdModal] = useState(false)
   const workerRef = useRef(null)
   const startTimeRef = useRef(null)
   const t = STRINGS[lang]
-
-  useEffect(() => {
-    if (calcCount > 0 && calcCount % 3 === 0) setShowAdModal(true)
-  }, [calcCount])
 
   // ── Worker生成 ──
   const createWorker = useCallback(() => {
@@ -529,7 +504,6 @@ export default function App() {
         case 'result':
           setResult(e.data.data)
           setStatus('done')
-          setCalcCount(prev => prev + 1)
           {
             const elapsed = Date.now() - startTimeRef.current
             const min = Math.floor(elapsed / 60000)
@@ -667,8 +641,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* 広告スペース */}
-      <div className="ad-space" />
 
       {/* ログ表示 */}
       {logs.length > 0 && <LoadingLog logs={logs} />}
@@ -713,7 +685,6 @@ export default function App() {
           t={t}
         />
       )}
-      {showAdModal && <AdModal onClose={() => setShowAdModal(false)} t={t} />}
     </div>
   )
 }
