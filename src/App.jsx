@@ -30,7 +30,7 @@ const STRINGS = {
     computing: '計算中...',
     loading_wasm: 'ソルバーを読み込み中...',
     cancel: '計算を中止',
-    searchNote: '組み合わせによっては数分かかることがあります。計算中は⏹で中止できます。',
+    searchNote: '組み合わせによっては数分かかることがあります。\n計算中は中止できます。',
   },
   en: {
     title: 'Puzzle & Survival\nHero Specialty Optimizer',
@@ -57,7 +57,7 @@ const STRINGS = {
     computing: 'Computing...',
     loading_wasm: 'Loading solver...',
     cancel: 'Cancel',
-    searchNote: 'Some combinations may take a few minutes. You can cancel anytime.',
+    searchNote: 'Some combinations may take a few minutes.\nYou can cancel anytime.',
   },
   zh: {
     title: '末日喧嚣\n英雄专长优化器',
@@ -84,7 +84,7 @@ const STRINGS = {
     computing: '计算中...',
     loading_wasm: '加载求解器...',
     cancel: '取消计算',
-    searchNote: '部分组合可能需要数分钟。计算中可随时取消。',
+    searchNote: '部分组合可能需要数分钟。\n计算中可随时取消。',
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
@@ -111,7 +111,7 @@ const STRINGS = {
     computing: 'Вычисление...',
     loading_wasm: 'Загрузка решателя...',
     cancel: 'Отменить',
-    searchNote: 'Некоторые комбинации могут занять несколько минут. Можно отменить.',
+    searchNote: 'Некоторые комбинации могут занять несколько минут.\nМожно отменить.',
   },
 }
 
@@ -588,7 +588,7 @@ export default function App() {
         <div className="search-btn-wrap">
           {status === 'loading' ? (
             <button className="search-btn" onClick={handleCancel}>
-              ⏹ {t.cancel}
+              {t.cancel}
             </button>
           ) : (
             <button className="search-btn" onClick={handleSolve} disabled={!wasmReady}>
