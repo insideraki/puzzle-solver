@@ -472,7 +472,13 @@ function NumpadPopup({ color, value, onPress, onBackspace, onConfirm, onCancel }
 // メインApp
 // ============================================================
 export default function App() {
-  const [lang, setLang] = useState('ja')
+  const [lang, setLang] = useState(() => {
+    const l = (navigator.language || '').toLowerCase()
+    if (l.startsWith('ja')) return 'ja'
+    if (l.startsWith('zh')) return 'zh'
+    if (l.startsWith('ru')) return 'ru'
+    return 'en'
+  })
   const [pieces, setPieces] = useState({ green:0, blue:0, purple:0, gold:0, red:0 })
   const [numpadTarget, setNumpadTarget] = useState(null)
   const [numpadInput, setNumpadInput]   = useState('')
