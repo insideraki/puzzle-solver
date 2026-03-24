@@ -315,7 +315,7 @@ self.onmessage = async (e) => {
 
         const g = hand[2], pu = hand[3], go = hand[4], r = hand[0], b = hand[1]
         const totalHand = hand.reduce((sum, v) => sum + v, 0)
-        const isOptimalFixed = totalHand >= 45 && g >= 8 && go >= 7 && pu >= 8 &&
+        const isOptimalFixed = g >= 8 && go >= 7 && pu >= 8 &&
           ((r >= 8 && b >= 2) || (r >= 2 && b >= 8))
 
         // 5色の全組み合わせ列挙
@@ -351,18 +351,6 @@ self.onmessage = async (e) => {
           if (c1[0] !== c2[0] || c1[1] !== c2[1]) combos.push(c2)
         } else {
           enumerate(0, [0,0,0,0,0])
-          // f1Limitに弾かれる最強候補を補完
-          if (g >= 8 && go >= 7 && pu >= 8) {
-            const extras = [
-              [Math.min(r,8), Math.min(b,2), 8, 8, 7],
-              [Math.min(r,2), Math.min(b,8), 8, 8, 7],
-            ]
-            for (const c of extras) {
-              if (c.every((v,i) => v <= hand[i]) && c.reduce((s,v)=>s+v,0) > 0) {
-                combos.push(c)
-              }
-            }
-          }
         }
 
         log(`[探索] 配分候補: ${combos.length}通り`)
