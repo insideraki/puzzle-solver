@@ -330,7 +330,9 @@ self.onmessage = async (e) => {
             if (current[0] > current[1]) return
             // F1合計が上限を超える場合はスキップ
             const f1Total = current.reduce((sum, v) => sum + v, 0)
-            const f1Limit = 33
+            const canMakeOptimal = g >= 8 && go >= 7 && pu >= 8 &&
+              ((r >= 8 && b >= 2) || (r >= 2 && b >= 8))
+            const f1Limit = (canMakeOptimal && totalHand > 33) ? totalHand - 33 : 33
             if (f1Total > f1Limit) return
             combos.push([...current])
             return
