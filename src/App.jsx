@@ -145,26 +145,6 @@ const STRINGS = {
 }
 
 // ============================================================
-// 広告
-// ============================================================
-// ネイティブバナー（AdSense承認後はここのスクリプトURLとコンテナIDを差し替え）
-const NATIVE_BANNER_SRC = 'https://pl28970522.profitablecpmratenetwork.com/db11080a3c9f93ec5e939950e2747291/invoke.js'
-const NATIVE_BANNER_ID  = 'container-db11080a3c9f93ec5e939950e2747291'
-
-function NativeBanner() {
-  useEffect(() => {
-    if (document.getElementById('native-banner-script')) return
-    const s = document.createElement('script')
-    s.id = 'native-banner-script'
-    s.src = NATIVE_BANNER_SRC
-    s.async = true
-    s.setAttribute('data-cfasync', 'false')
-    document.body.appendChild(s)
-  }, [])
-  return <div id={NATIVE_BANNER_ID} />
-}
-
-// ============================================================
 // ゲームデータ
 // ============================================================
 const BUFFS = {
@@ -661,9 +641,6 @@ export default function App() {
         </div>
       </div>
 
-
-      {/* ネイティブバナー広告 */}
-      <NativeBanner />
 
       {/* ログ表示 */}
       {logs.length > 0 && <LoadingLog logs={logs} />}
