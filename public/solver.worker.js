@@ -414,7 +414,6 @@ self.onmessage = async (e) => {
           // 全組み合わせで配置なし
           patterns = []
         } else if (bestR2 && bestR2.power > 0) {
-          log(S.skill1_done(label, bestR1.power.toLocaleString(), bestR1.status_count))
           log(S.skill2_done(bestR2.power.toLocaleString(), bestR2.status_count))
           log(S.total(bestTotal.toLocaleString()))
           patterns = [{
@@ -436,7 +435,6 @@ self.onmessage = async (e) => {
             patterns.push(swapped)
           }
         } else {
-          log(S.skill1_done(label, bestR1.power.toLocaleString(), bestR1.status_count))
           patterns = [{
             power:        bestR1.power,
             status_count: bestR1.status_count,
