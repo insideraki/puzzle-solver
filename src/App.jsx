@@ -120,29 +120,14 @@ const STRINGS = {
 }
 
 // ============================================================
-// 広告（AdSense承認後にここを差し替え）
+// 広告（AdSense承認後にAD_URLを差し替え）
 // ============================================================
-const AD_SCRIPT_SRC = 'https://pl28969529.profitablecpmratenetwork.com/dd/4f/4f/dd4f4f1cc98dfd378535b04826ecb348.js'
-let adScriptInserted = false
-
-function AdComponent() {
-  const containerRef = useRef(null)
-  useEffect(() => {
-    if (adScriptInserted || !containerRef.current) return
-    adScriptInserted = true
-    const script = document.createElement('script')
-    script.src = AD_SCRIPT_SRC
-    script.async = true
-    containerRef.current.appendChild(script)
-  }, [])
-  return <div ref={containerRef} />
-}
+const AD_URL = 'https://pl28969529.profitablecpmratenetwork.com/dd/4f/4f/dd4f4f1cc98dfd378535b04826ecb348.js'
 
 function AdModal({ onClose, t }) {
   return (
     <div className="ad-modal-overlay" onClick={onClose}>
       <div className="ad-modal-content" onClick={e => e.stopPropagation()}>
-        <AdComponent />
         <button className="ad-modal-close" onClick={onClose}>{t.close}</button>
       </div>
     </div>
@@ -485,7 +470,10 @@ export default function App() {
   const t = STRINGS[lang]
 
   useEffect(() => {
-    if (calcCount > 0 && calcCount % 3 === 0) setShowAdModal(true)
+    if (calcCount > 0 && calcCount % 3 === 0) {
+      window.open(AD_URL, '_blank')
+      setShowAdModal(true)
+    }
   }, [calcCount])
 
   // ── Worker生成 ──
