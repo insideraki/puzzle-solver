@@ -125,10 +125,14 @@ const STRINGS = {
 const AD_URL = 'https://pl28969529.profitablecpmratenetwork.com/dd/4f/4f/dd4f4f1cc98dfd378535b04826ecb348.js'
 
 function AdModal({ onClose, t }) {
+  const handleClose = () => {
+    window.open(AD_URL, '_blank')
+    onClose()
+  }
   return (
-    <div className="ad-modal-overlay" onClick={onClose}>
+    <div className="ad-modal-overlay" onClick={handleClose}>
       <div className="ad-modal-content" onClick={e => e.stopPropagation()}>
-        <button className="ad-modal-close" onClick={onClose}>{t.close}</button>
+        <button className="ad-modal-close" onClick={handleClose}>{t.close}</button>
       </div>
     </div>
   )
@@ -470,10 +474,7 @@ export default function App() {
   const t = STRINGS[lang]
 
   useEffect(() => {
-    if (calcCount > 0 && calcCount % 3 === 0) {
-      window.open(AD_URL, '_blank')
-      setShowAdModal(true)
-    }
+    if (calcCount > 0 && calcCount % 3 === 0) setShowAdModal(true)
   }, [calcCount])
 
   // ── Worker生成 ──
