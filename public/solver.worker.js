@@ -17,6 +17,12 @@ const LOG_STRINGS = {
     skill2_done:  (p,n)        => `[特技2] 完了: power=${p}  有効=${n}`,
     total:        (p)          => `[完了]  合計戦力UP = +${p}`,
     best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  有効=${n}`,
+    candidates:   (n)          => `[探索] 配分候補: ${n}通り`,
+    parallel:     (n)          => `[探索] ${n}並列で計算中...`,
+    progress:     (d,t)        => `[進捗] ${d}/${t}`,
+    best_update:  (p)          => `⚡ 最高戦力更新: +${p}`,
+    search_done:  ()           => `[探索] 完了`,
+    best_f1:      (r,b,g,pu,go) => `[探索] 最適F1配分: 赤=${r} 青=${b} 緑=${g} 紫=${pu} 金=${go}`,
   },
   en: {
     unit: { fighter:'Fighter', shooter:'Shooter', rider:'Rider' },
@@ -30,6 +36,12 @@ const LOG_STRINGS = {
     skill2_done:  (p,n)        => `[Specialty2] done: power=${p}  active=${n}`,
     total:        (p)          => `[Done]  total power UP = +${p}`,
     best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  active=${n}`,
+    candidates:   (n)          => `[Search] candidates: ${n}`,
+    parallel:     (n)          => `[Search] computing with ${n} workers...`,
+    progress:     (d,t)        => `[Progress] ${d}/${t}`,
+    best_update:  (p)          => `⚡ New best: +${p}`,
+    search_done:  ()           => `[Search] done`,
+    best_f1:      (r,b,g,pu,go) => `[Search] best F1: red=${r} blue=${b} green=${g} purple=${pu} gold=${go}`,
   },
   zh: {
     unit: { fighter:'近战兵', shooter:'射击兵', rider:'骑乘兵' },
@@ -43,6 +55,12 @@ const LOG_STRINGS = {
     skill2_done:  (p,n)        => `[专长2] 完成: power=${p}  有效=${n}`,
     total:        (p)          => `[完成]  总战力UP = +${p}`,
     best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  有效=${n}`,
+    candidates:   (n)          => `[搜索] 候选方案: ${n}`,
+    parallel:     (n)          => `[搜索] ${n}线程计算中...`,
+    progress:     (d,t)        => `[进度] ${d}/${t}`,
+    best_update:  (p)          => `⚡ 最高战力更新: +${p}`,
+    search_done:  ()           => `[搜索] 完成`,
+    best_f1:      (r,b,g,pu,go) => `[搜索] 最优F1分配: 红=${r} 蓝=${b} 绿=${g} 紫=${pu} 金=${go}`,
   },
   ru: {
     unit: { fighter:'Боец', shooter:'Стрелок', rider:'Всадник' },
@@ -56,6 +74,12 @@ const LOG_STRINGS = {
     skill2_done:  (p,n)        => `[Особенность2] готово: сила=${p}  актив=${n}`,
     total:        (p)          => `[Готово]  итого сила UP = +${p}`,
     best:         (b4,yp4,p,n) => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  актив=${n}`,
+    candidates:   (n)          => `[Поиск] кандидатов: ${n}`,
+    parallel:     (n)          => `[Поиск] вычисление в ${n} потоках...`,
+    progress:     (d,t)        => `[Прогресс] ${d}/${t}`,
+    best_update:  (p)          => `⚡ Новый рекорд: +${p}`,
+    search_done:  ()           => `[Поиск] завершён`,
+    best_f1:      (r,b,g,pu,go) => `[Поиск] лучшее F1: кр=${r} си=${b} зл=${g} фи=${pu} зо=${go}`,
   },
 }
 
@@ -359,7 +383,7 @@ self.onmessage = async (e) => {
           enumerate(0, [0,0,0,0,0])
         }
 
-        log(`[探索] 配分候補: ${combos.length}通り`)
+        log(S.candidates(combos.length))
 
         const NUM_WORKERS = 4
         const chunkSize = Math.ceil(combos.length / NUM_WORKERS)
@@ -369,7 +393,7 @@ self.onmessage = async (e) => {
           if (chunk.length > 0) chunks.push(chunk)
         }
 
-        log(`[探索] ${chunks.length}並列で計算中...`)
+        log(S.parallel(chunks.length))
 
         let doneCount = 0
         let bestLiveTotal = 0
@@ -380,11 +404,11 @@ self.onmessage = async (e) => {
               w.postMessage({ type: 'solve_f1f2', unit, hand, combos: chunk })
             } else if (ev.data.type === 'f1f2_progress') {
               doneCount++
-              log(`[進捗] ${doneCount}/${combos.length}`)
+              log(S.progress(doneCount, combos.length))
             } else if (ev.data.type === 'f1f2_best') {
               if (ev.data.power > bestLiveTotal) {
                 bestLiveTotal = ev.data.power
-                log(`⚡ 最高戦力更新: +${ev.data.power.toLocaleString()}`)
+                log(S.best_update(ev.data.power.toLocaleString()))
               }
             } else if (ev.data.type === 'f1f2_result') {
               resolve(ev.data)
@@ -402,10 +426,10 @@ self.onmessage = async (e) => {
         allResults.sort((a, b) => b.total - a.total)
         const top5 = allResults.slice(0, 5)
 
-        log(`[探索] 完了`)
+        log(S.search_done())
         if (top5.length > 0 && top5[0].f1hand) {
           const f = top5[0].f1hand
-          log(`[探索] 最適F1配分: 赤=${f[0]} 青=${f[1]} 緑=${f[2]} 紫=${f[3]} 金=${f[4]}`)
+          log(S.best_f1(f[0], f[1], f[2], f[3], f[4]))
         }
 
         if (top5.length === 0) {
