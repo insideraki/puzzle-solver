@@ -419,7 +419,13 @@ self.onmessage = async (e) => {
           }
 
           const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
-          const fieldKey  = (fields) => fields.map(f => f.field.join(',')).join('|')
+          // 重複判定キー：総戦力 + バフ内容が同じなら同一とみなす
+          const patternKey = (pat) => {
+            const b = pat.buffs
+            return `${pat.power}|` + ['F','S','R','部隊'].map(u =>
+              ['ATK','DEF','HP'].map(s => b[u]?.[s] ?? 0).join(',')
+            ).join('|')
+          }
           const seen = new Set()
 
           for (const { total, r1, r2 } of top5) {
@@ -443,19 +449,19 @@ self.onmessage = async (e) => {
               }
             }
 
-            const key = fieldKey(pat.fields)
+            const key = patternKey(pat)
             if (!seen.has(key)) {
               seen.add(key)
               patterns.push(pat)
             }
 
-            // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加（同一配置は除外）
+            // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加（同一バフは除外）
             if (hand[0] === hand[1]) {
               const swapped = {
                 ...pat,
                 fields: pat.fields.map(f => ({ ...f, field: swapField(f.field) }))
               }
-              const swapKey = fieldKey(swapped.fields)
+              const swapKey = patternKey(swapped)
               if (!seen.has(swapKey)) {
                 seen.add(swapKey)
                 patterns.push(swapped)
