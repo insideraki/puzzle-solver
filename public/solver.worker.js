@@ -219,8 +219,8 @@ self.onmessage = async (e) => {
     const { unit, hand, combos } = e.data
 
     const f2Cache = new Map()
+    const topResults = []  // [{total, r1, r2, f1hand}] 上位5件
     let bestTotal = 0
-    let bestR1 = null, bestR2 = null, bestF1hand = null
 
     for (const f1hand of combos) {
       self.postMessage({ type: 'f1f2_progress' })
@@ -244,16 +244,17 @@ self.onmessage = async (e) => {
       }
 
       const total = r1.power + r2.power
+      topResults.push({ total, r1, r2, f1hand })
+      topResults.sort((a, b) => b.total - a.total)
+      if (topResults.length > 5) topResults.pop()
+
       if (total > bestTotal) {
         bestTotal = total
-        bestR1 = r1
-        bestR2 = r2
-        bestF1hand = f1hand
         self.postMessage({ type: 'f1f2_best', power: bestTotal })
       }
     }
 
-    self.postMessage({ type: 'f1f2_result', bestTotal, bestR1, bestR2, bestF1hand })
+    self.postMessage({ type: 'f1f2_result', topResults })
     return
   }
 
@@ -393,62 +394,73 @@ self.onmessage = async (e) => {
           w.onerror = (err) => { reject(err); w.terminate() }
         })))
 
-        // 全workerの結果から最大を選ぶ
-        let bestTotal = 0
-        let bestR1 = null, bestR2 = null, bestF1hand = null
+        // 全workerの結果をマージして上位5件を選ぶ
+        const allResults = []
         for (const wr of workerResults) {
-          if (wr.bestTotal > bestTotal) {
-            bestTotal = wr.bestTotal
-            bestR1 = wr.bestR1
-            bestR2 = wr.bestR2
-            bestF1hand = wr.bestF1hand
-          }
+          if (wr.topResults) allResults.push(...wr.topResults)
         }
+        allResults.sort((a, b) => b.total - a.total)
+        const top5 = allResults.slice(0, 5)
 
         log(`[探索] 完了`)
-        if (bestF1hand) {
-          log(`[探索] 最適F1配分: 赤=${bestF1hand[0]} 青=${bestF1hand[1]} 緑=${bestF1hand[2]} 紫=${bestF1hand[3]} 金=${bestF1hand[4]}`)
+        if (top5.length > 0 && top5[0].f1hand) {
+          const f = top5[0].f1hand
+          log(`[探索] 最適F1配分: 赤=${f[0]} 青=${f[1]} 緑=${f[2]} 紫=${f[3]} 金=${f[4]}`)
         }
 
-        if (!bestR1) {
-          // 全組み合わせで配置なし
+        if (top5.length === 0) {
           patterns = []
-        } else if (bestR2 && bestR2.power > 0) {
-          log(S.skill2_done(bestR2.power.toLocaleString(), bestR2.status_count))
-          log(S.total(bestTotal.toLocaleString()))
-          patterns = [{
-            power:        bestTotal,
-            status_count: bestR1.status_count + bestR2.status_count,
-            fields: [
-              { key:'skill1', field: convertField(bestR1.field) },
-              { key:'skill2', field: convertField(bestR2.field) },
-            ],
-            buffs: mergeBuffs(calcBuffs(bestR1.patterns), calcBuffs(bestR2.patterns)),
-          }]
-          // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加
-          if (hand[0] === hand[1]) {
-            const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
-            const swapped = {
-              ...patterns[0],
-              fields: patterns[0].fields.map(f => ({ ...f, field: swapField(f.field) }))
-            }
-            patterns.push(swapped)
-          }
         } else {
-          patterns = [{
-            power:        bestR1.power,
-            status_count: bestR1.status_count,
-            fields:       [{ key:'skill1', field: convertField(bestR1.field) }],
-            buffs:        calcBuffs(bestR1.patterns),
-          }]
-          // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加
-          if (hand[0] === hand[1]) {
-            const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
-            const swapped = {
-              ...patterns[0],
-              fields: patterns[0].fields.map(f => ({ ...f, field: swapField(f.field) }))
+          // ベスト結果のログ
+          const best = top5[0]
+          if (best.r2 && best.r2.power > 0) {
+            log(S.skill2_done(best.r2.power.toLocaleString(), best.r2.status_count))
+            log(S.total(best.total.toLocaleString()))
+          }
+
+          const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
+          const fieldKey  = (fields) => fields.map(f => f.field.join(',')).join('|')
+          const seen = new Set()
+
+          for (const { total, r1, r2 } of top5) {
+            let pat
+            if (r2 && r2.power > 0) {
+              pat = {
+                power:        total,
+                status_count: r1.status_count + r2.status_count,
+                fields: [
+                  { key:'skill1', field: convertField(r1.field) },
+                  { key:'skill2', field: convertField(r2.field) },
+                ],
+                buffs: mergeBuffs(calcBuffs(r1.patterns), calcBuffs(r2.patterns)),
+              }
+            } else {
+              pat = {
+                power:        r1.power,
+                status_count: r1.status_count,
+                fields:       [{ key:'skill1', field: convertField(r1.field) }],
+                buffs:        calcBuffs(r1.patterns),
+              }
             }
-            patterns.push(swapped)
+
+            const key = fieldKey(pat.fields)
+            if (!seen.has(key)) {
+              seen.add(key)
+              patterns.push(pat)
+            }
+
+            // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加（同一配置は除外）
+            if (hand[0] === hand[1]) {
+              const swapped = {
+                ...pat,
+                fields: pat.fields.map(f => ({ ...f, field: swapField(f.field) }))
+              }
+              const swapKey = fieldKey(swapped.fields)
+              if (!seen.has(swapKey)) {
+                seen.add(swapKey)
+                patterns.push(swapped)
+              }
+            }
           }
         }
       }
