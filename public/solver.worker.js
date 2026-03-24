@@ -327,7 +327,7 @@ self.onmessage = async (e) => {
             // 全色0はスキップ
             if (current.every(v => v === 0)) return
             // 赤(index 0)>青(index 1)の場合はスキップ（赤↔青対称）
-            if (current[0] > current[1]) return
+            if (hand[0] === hand[1] && current[0] > current[1]) return
             // F1合計が上限を超える場合はスキップ
             const f1Total = current.reduce((sum, v) => sum + v, 0)
             const canMakeOptimal = g >= 8 && go >= 7 && pu >= 8 &&
