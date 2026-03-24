@@ -25,6 +25,7 @@ const STRINGS = {
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
     err: 'エラーが発生しました。もう一度試してください。',
     share: 'シェア',
+    tweet: '#パズサバ 英雄特技最適化ツール https://puzzle-solver-bice.vercel.app',
     discord_copy: 'Discord にコピー',
     copied: 'クリップボードにコピーしました',
     computing: '計算中...',
@@ -54,6 +55,7 @@ const STRINGS = {
     none: 'No patterns found.\nTry adding more pieces.',
     err: 'An error occurred. Please try again.',
     share: 'Share',
+    tweet: '#PuzzlesAndSurvival Hero Skill Optimizer https://puzzle-solver-bice.vercel.app',
     discord_copy: 'Copy for Discord',
     copied: 'Copied to clipboard',
     computing: 'Computing...',
@@ -83,6 +85,8 @@ const STRINGS = {
     none: '未找到可配置方案\n请增加棋子数量',
     err: '发生错误，请重试',
     share: '分享',
+    tweet: '#Puzzles英雄技能优化工具 https://puzzle-solver-bice.vercel.app',
+    weibo: '微博',
     discord_copy: '复制到Discord',
     copied: '已复制到剪贴板',
     computing: '计算中...',
@@ -112,6 +116,7 @@ const STRINGS = {
     none: 'Вариантов не найдено\nДобавьте больше фигур.',
     err: 'Произошла ошибка. Попробуйте снова.',
     share: 'Поделиться',
+    tweet: '#PuzzlesAndSurvival Оптимизатор навыков героя https://puzzle-solver-bice.vercel.app',
     discord_copy: 'Скопировать для Discord',
     copied: 'Скопировано в буфер обмена',
     computing: 'Вычисление...',
@@ -221,12 +226,20 @@ function ShareButtons({ pattern, t }) {
       <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
     </svg>
   )
+  const IconWeibo = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10.098 20.323c-3.977.415-7.411-1.496-7.671-4.27-.259-2.774 2.755-5.355 6.733-5.771 3.977-.416 7.411 1.495 7.67 4.269.26 2.774-2.754 5.356-6.732 5.772zm7.044-9.265c-.237-.065-.399-.108-.275-.39.269-.676.296-1.26.006-1.677-.557-.793-2.083-.751-3.836-.013 0 0-.548.24-.408-.195.268-.866.228-1.59-.191-2.008-.952-.943-3.483.036-5.651 2.207-1.63 1.636-2.58 3.352-2.58 4.842 0 2.752 3.532 4.424 6.991 4.424 4.535 0 7.549-2.638 7.549-4.731 0-1.265-.955-1.983-1.605-2.459zm-5.817 7.511c-2.43.251-4.532-.792-4.702-2.334-.17-1.542 1.664-2.981 4.094-3.232 2.43-.252 4.532.791 4.703 2.333.17 1.542-1.664 2.98-4.095 3.233zm2.036-2.569c-.096.507-.57.878-1.067.838-.497-.04-.814-.477-.718-.984.095-.504.565-.874 1.062-.837.497.04.818.477.723.983zm-1.33-1.105c-.23.023-.38.22-.335.44.046.22.266.368.496.345.23-.023.381-.22.335-.44-.046-.219-.266-.368-.496-.345zm7.197-9.266c.48 1.127.523 2.412.07 3.62a.467.467 0 0 1-.598.271.468.468 0 0 1-.271-.599c.37-.976.333-2.02-.105-2.948-.438-.928-1.24-1.594-2.221-1.848a.468.468 0 0 1-.333-.571.468.468 0 0 1 .572-.333c1.265.321 2.306 1.181 2.886 2.408zm-1.744.832a2.16 2.16 0 0 1 .048 1.749.428.428 0 0 1-.551.247.428.428 0 0 1-.247-.551 1.31 1.31 0 0 0-.03-1.062 1.316 1.316 0 0 0-.814-.695.428.428 0 0 1-.291-.533.428.428 0 0 1 .533-.291c.607.168 1.106.573 1.352 1.136z"/>
+    </svg>
+  )
 
   return (
     <div className="share-section">
       <div className="share-label">{t.share}</div>
       <div className="share-row">
-        <a className="share-btn btn-x" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><IconX /> X</a>
+        <a className="share-btn btn-x" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(t.tweet)}`} target="_blank" rel="noreferrer"><IconX /> X</a>
+        {t.weibo ? (
+          <a className="share-btn btn-weibo" href={`http://service.weibo.com/share/share.php?url=${encodeURIComponent(TOOL_URL)}&title=${encodeURIComponent(t.tweet)}`} target="_blank" rel="noreferrer"><IconWeibo /> {t.weibo}</a>
+        ) : null}
         <a className="share-btn btn-fb" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(TOOL_URL)}`} target="_blank" rel="noreferrer"><IconFB /> Facebook</a>
         <a className="share-btn btn-line" href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(TOOL_URL)}&text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><IconLINE /> LINE</a>
         <button className="share-btn btn-discord" onClick={handleDiscord}><IconDiscord /> {t.discord_copy}</button>
