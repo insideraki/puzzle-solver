@@ -65,6 +65,24 @@ const STRINGS = {
           '金7個以上でL字配置が確定最適',
         ],
       },
+      {
+        title: 'ツールについて',
+        lines: [
+          'このツールは、パズル&サバイバルの英雄特技（チェス配置）を自動で最適化します。手持ちの駒数を入力するだけで、戦力が最大になるF1/F2配置を計算します。',
+        ],
+      },
+      {
+        title: 'このツールが役立つ場面',
+        lines: [
+          '駒が増えてきてどう配置すればいいかわからない方、F2が解放されたばかりの方、より高い戦力を目指している方におすすめです。',
+        ],
+      },
+      {
+        title: '注意事項',
+        lines: [
+          '計算結果はゲームのバランス調整により変わる場合があります。最新のゲームデータに基づいて定期的に更新しています。入力する駒の組み合わせによっては計算に数分かかる場合があります。',
+        ],
+      },
     ],
     privacyTitle: 'プライバシーポリシー',
     privacyLines: [
@@ -138,6 +156,24 @@ const STRINGS = {
           'Fighter/Shooter: Red×8, Green×8, Gold×7, Purple×8, Blue×2',
           'Rider: Red×2, Green×8, Gold×7, Purple×8, Blue×8',
           'With 7+ Gold tiles, L-shape placement is always optimal',
+        ],
+      },
+      {
+        title: 'About This Tool',
+        lines: [
+          'This tool automatically optimizes Hero Skill placements (chess piece arrangements) in Puzzle & Survival. Simply enter the number of pieces you have, and it calculates the optimal F1/F2 configuration to maximize your combat power.',
+        ],
+      },
+      {
+        title: 'When This Tool Helps',
+        lines: [
+          'Recommended for players who are unsure how to arrange their growing collection of pieces, those who just unlocked F2, or anyone looking to maximize their combat power.',
+        ],
+      },
+      {
+        title: 'Notes',
+        lines: [
+          'Calculation results may change due to game balance adjustments. The tool is regularly updated based on the latest game data. Depending on the combination of pieces entered, calculation may take several minutes.',
         ],
       },
     ],
@@ -216,6 +252,24 @@ const STRINGS = {
           '金棋子7个以上时，L形配置为确定最优',
         ],
       },
+      {
+        title: '关于本工具',
+        lines: [
+          '该工具可自动优化《Puzzle & Survival》的英雄特技（棋子配置）。只需输入您拥有的棋子数量，即可计算出使战力最大化的F1/F2配置。',
+        ],
+      },
+      {
+        title: '适用场景',
+        lines: [
+          '适合不知道如何配置逐渐增多的棋子、刚解锁F2的玩家，以及希望提升更高战力的玩家。',
+        ],
+      },
+      {
+        title: '注意事项',
+        lines: [
+          '计算结果可能会因游戏平衡调整而发生变化。工具会基于最新的游戏数据进行定期更新。根据输入的棋子组合，计算可能需要几分钟时间。',
+        ],
+      },
     ],
     privacyTitle: '隐私政策',
     privacyLines: [
@@ -291,6 +345,24 @@ const STRINGS = {
           '금 타일 7개 이상이면 L자 배치가 항상 최적',
         ],
       },
+      {
+        title: '이 도구에 대하여',
+        lines: [
+          '이 도구는 퍼즐 & 서바이벌의 영웅 특기(체스 배치)를 자동으로 최적화합니다. 보유한 말의 수만 입력하면 전투력이 최대가 되는 F1/F2 배치를 계산합니다.',
+        ],
+      },
+      {
+        title: '이 도구가 유용한 경우',
+        lines: [
+          '말이 많아져 어떻게 배치해야 할지 모르는 경우, F2를 막 해금한 경우, 더 높은 전투력을 목표로 하는 분들께 추천합니다.',
+        ],
+      },
+      {
+        title: '주의사항',
+        lines: [
+          '계산 결과는 게임 밸런스 조정에 따라 변경될 수 있습니다. 최신 게임 데이터를 기반으로 정기적으로 업데이트됩니다. 입력한 말의 조합에 따라 계산에 몇 분 정도 소요될 수 있습니다.',
+        ],
+      },
     ],
     privacyTitle: '개인정보 처리방침',
     privacyLines: [
@@ -364,6 +436,24 @@ const STRINGS = {
           'Боец/Стрелок: Красный×8, Зелёный×8, Золотой×7, Фиолетовый×8, Синий×2',
           'Всадник: Красный×2, Зелёный×8, Золотой×7, Фиолетовый×8, Синий×8',
           'При 7+ золотых плитках Г-образная расстановка всегда оптимальна',
+        ],
+      },
+      {
+        title: 'Об инструменте',
+        lines: [
+          'Этот инструмент автоматически оптимизирует особенности героев (расстановку фигур) в игре Puzzle & Survival. Просто введите количество имеющихся у вас фигур, и он рассчитает оптимальную расстановку F1/F2 для максимальной боевой мощи.',
+        ],
+      },
+      {
+        title: 'Когда пригодится инструмент',
+        lines: [
+          'Подходит для тех, кто не знает, как расставить увеличившееся количество фигур, кто только что открыл F2, а также для тех, кто стремится к более высокой боевой мощи.',
+        ],
+      },
+      {
+        title: 'Примечания',
+        lines: [
+          'Результаты расчётов могут изменяться в зависимости от баланса игры. Инструмент регулярно обновляется на основе актуальных игровых данных. В зависимости от комбинации введённых фигур расчёт может занять несколько минут.',
         ],
       },
     ],
