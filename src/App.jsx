@@ -210,6 +210,74 @@ const STRINGS = {
       '本站不收集任何个人信息。',
     ],
   },
+  ko: {
+    title: 'HERO OPTIMIZER\n퍼즐 & 서바이벌 영웅 특기 최적화기',
+    chest: '보유 타일',
+    unitPref: '병종 선택',
+    unitHint: '주력 병종을 선택하면 더 빠르게 최적화됩니다',
+    unit: { fighter:'파이터', shooter:'슈터', rider:'라이더' },
+    search: '계산 시작',
+    found: '최적 배치를 찾았습니다',
+    of: '/',
+    power: '전투력 상승',
+    status: '활성 스탯 수',
+    fighter: '파이터',
+    shooter: '슈터',
+    rider: '라이더',
+    troop: '부대',
+    allUnit: '전투력 우선',
+    hint: '타일을 늘리면 선택지가 더 많아집니다',
+    none: '배치 가능한 패턴을 찾을 수 없습니다.\n타일을 더 추가하세요.',
+    err: '오류가 발생했습니다. 다시 시도해 주세요.',
+    share: '공유',
+    tweet: '#퍼즐앤서바이벌 영웅 특기 최적화 도구 https://puzzle-solver-bice.vercel.app',
+    discord_copy: 'Discord에 복사',
+    copied: '클립보드에 복사되었습니다',
+    computing: '계산 중...',
+    loading_wasm: '솔버를 불러오는 중...',
+    cancel: '계산 취소',
+    searchNote: '일부 조합은 몇 분이 걸릴 수 있습니다.\n계산 중 언제든 취소할 수 있습니다.',
+    close: '닫기',
+    tapToContinue: '탭하여 계속',
+    colors: { green:'초록', blue:'파랑', purple:'보라', gold:'금', red:'빨강' },
+    numpad_cancel: '취소',
+    numpad_confirm: '확인',
+    numpad_next: '확인 → 다음',
+    howToUseTitle: '사용 방법',
+    howToUseSections: [
+      {
+        title: '도구 사용 절차',
+        lines: [
+          '1. 보유한 타일 수를 색상별로 입력',
+          '2. 「계산 시작」을 누르기',
+          '3. 상위 배치가 캐러셀로 표시됩니다',
+        ],
+      },
+      {
+        title: 'F1 / F2 게임 내 설명',
+        lines: [
+          'F1: 일반 영웅 특기 슬롯',
+          'F2: 타일 30개 이상 보유 시 해금되는 두 번째 슬롯',
+          'F1과 F2에 타일을 최적으로 배분하여 전투력을 최대화',
+        ],
+      },
+      {
+        title: '최강 배치 설명',
+        lines: [
+          '최강 배치는 33개 타일 사용 (총 35칸 중)',
+          '파이터/슈터: 빨강×8, 초록×8, 금×7, 보라×8, 파랑×2',
+          '라이더: 빨강×2, 초록×8, 금×7, 보라×8, 파랑×8',
+          '금 타일 7개 이상이면 L자 배치가 항상 최적',
+        ],
+      },
+    ],
+    privacyTitle: '개인정보 처리방침',
+    privacyLines: [
+      'Google Analytics를 사용하여 익명 방문 데이터를 수집합니다.',
+      '향후 광고(Google AdSense)가 표시될 수 있습니다.',
+      '개인 정보는 수집하지 않습니다.',
+    ],
+  },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
     chest: 'Доступные Плитки',
@@ -659,6 +727,7 @@ export default function App() {
     if (l.startsWith('ja')) return 'ja'
     if (l.startsWith('zh')) return 'zh'
     if (l.startsWith('ru')) return 'ru'
+    if (l.startsWith('ko')) return 'ko'
     return 'en'
   })
   const [pieces, setPieces] = useState({ green:0, blue:0, purple:0, gold:0, red:0 })
@@ -784,6 +853,7 @@ export default function App() {
           <option value="ja">日本語</option>
           <option value="en">English</option>
           <option value="zh">中文</option>
+          <option value="ko">한국어</option>
           <option value="ru">Русский</option>
         </select>
       </div>
