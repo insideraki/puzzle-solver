@@ -41,6 +41,12 @@ const STRINGS = {
     howToUseTitle: '使い方',
     howToUseSections: [
       {
+        title: 'ツールについて',
+        lines: [
+          'このツールは、パズル&サバイバルの英雄特技（チェス配置）を自動で最適化します。手持ちの駒数を入力するだけで、戦力が最大になるF1/F2配置を計算します。',
+        ],
+      },
+      {
         title: 'ツールの使い方手順',
         lines: [
           '1. 手持ちのチェス駒を色ごとに入力',
@@ -49,32 +55,17 @@ const STRINGS = {
         ],
       },
       {
+        title: 'このツールが役立つ場面',
+        lines: [
+          '駒が増えてきてどう配置すればいいかわからない方、F2が解放されたばかりの方、より高い戦力を目指している方におすすめです。',
+        ],
+      },
+      {
         title: 'F1 / F2 のゲーム内説明',
         lines: [
           'F1：通常の英雄特技スロット',
           'F2：手持ち駒が30個以上で解放される第2スロット',
           'F1とF2に駒を最適配分して戦力を最大化する',
-        ],
-      },
-      {
-        title: '最強配置の解説',
-        lines: [
-          '最強配置は33個使用（35マス中）',
-          'ファイター/シューター：赤8・緑8・金7・紫8・青2',
-          'ライダー：赤2・緑8・金7・紫8・青8',
-          '金7個以上でL字配置が確定最適',
-        ],
-      },
-      {
-        title: 'ツールについて',
-        lines: [
-          'このツールは、パズル&サバイバルの英雄特技（チェス配置）を自動で最適化します。手持ちの駒数を入力するだけで、戦力が最大になるF1/F2配置を計算します。',
-        ],
-      },
-      {
-        title: 'このツールが役立つ場面',
-        lines: [
-          '駒が増えてきてどう配置すればいいかわからない方、F2が解放されたばかりの方、より高い戦力を目指している方におすすめです。',
         ],
       },
       {
@@ -135,6 +126,12 @@ const STRINGS = {
     howToUseTitle: 'How to Use',
     howToUseSections: [
       {
+        title: 'About This Tool',
+        lines: [
+          'This tool automatically optimizes Hero Skill placements (chess piece arrangements) in Puzzle & Survival. Simply enter the number of pieces you have, and it calculates the optimal F1/F2 configuration to maximize your combat power.',
+        ],
+      },
+      {
         title: 'How to Use This Tool',
         lines: [
           '1. Enter your available tiles by color',
@@ -143,32 +140,17 @@ const STRINGS = {
         ],
       },
       {
+        title: 'When This Tool Helps',
+        lines: [
+          'Recommended for players who are unsure how to arrange their growing collection of pieces, those who just unlocked F2, or anyone looking to maximize their combat power.',
+        ],
+      },
+      {
         title: 'F1 / F2 In-Game Slots',
         lines: [
           'F1: Standard hero specialty slot',
           'F2: Second slot, unlocked with 30+ tiles',
           'Optimally distributes tiles across F1 and F2 to maximize power',
-        ],
-      },
-      {
-        title: 'Best Placement Guide',
-        lines: [
-          'Best setup uses 33 tiles (out of 35 slots)',
-          'Fighter/Shooter: Red×8, Green×8, Gold×7, Purple×8, Blue×2',
-          'Rider: Red×2, Green×8, Gold×7, Purple×8, Blue×8',
-          'With 7+ Gold tiles, L-shape placement is always optimal',
-        ],
-      },
-      {
-        title: 'About This Tool',
-        lines: [
-          'This tool automatically optimizes Hero Skill placements (chess piece arrangements) in Puzzle & Survival. Simply enter the number of pieces you have, and it calculates the optimal F1/F2 configuration to maximize your combat power.',
-        ],
-      },
-      {
-        title: 'When This Tool Helps',
-        lines: [
-          'Recommended for players who are unsure how to arrange their growing collection of pieces, those who just unlocked F2, or anyone looking to maximize their combat power.',
         ],
       },
       {
@@ -230,6 +212,12 @@ const STRINGS = {
     howToUseTitle: '使用说明',
     howToUseSections: [
       {
+        title: '关于本工具',
+        lines: [
+          '该工具可自动优化《Puzzle & Survival》的英雄特技（棋子配置）。只需输入您拥有的棋子数量，即可计算出使战力最大化的F1/F2配置。',
+        ],
+      },
+      {
         title: '使用步骤',
         lines: [
           '1. 按颜色输入手持棋子数量',
@@ -238,32 +226,17 @@ const STRINGS = {
         ],
       },
       {
+        title: '适用场景',
+        lines: [
+          '适合不知道如何配置逐渐增多的棋子、刚解锁F2的玩家，以及希望提升更高战力的玩家。',
+        ],
+      },
+      {
         title: 'F1 / F2 游戏内说明',
         lines: [
           'F1：普通英雄专长槽位',
           'F2：持有30个以上棋子时解锁的第二槽位',
           '在F1和F2之间最优分配棋子以最大化战力',
-        ],
-      },
-      {
-        title: '最强配置解析',
-        lines: [
-          '最强配置使用33个棋子（共35格）',
-          '近战/射击兵：红×8、绿×8、金×7、紫×8、蓝×2',
-          '骑乘兵：红×2、绿×8、金×7、紫×8、蓝×8',
-          '金棋子7个以上时，L形配置为确定最优',
-        ],
-      },
-      {
-        title: '关于本工具',
-        lines: [
-          '该工具可自动优化《Puzzle & Survival》的英雄特技（棋子配置）。只需输入您拥有的棋子数量，即可计算出使战力最大化的F1/F2配置。',
-        ],
-      },
-      {
-        title: '适用场景',
-        lines: [
-          '适合不知道如何配置逐渐增多的棋子、刚解锁F2的玩家，以及希望提升更高战力的玩家。',
         ],
       },
       {
@@ -324,6 +297,12 @@ const STRINGS = {
     howToUseTitle: '사용 방법',
     howToUseSections: [
       {
+        title: '이 도구에 대하여',
+        lines: [
+          '이 도구는 퍼즐 & 서바이벌의 영웅 특기(체스 배치)를 자동으로 최적화합니다. 보유한 말의 수만 입력하면 전투력이 최대가 되는 F1/F2 배치를 계산합니다.',
+        ],
+      },
+      {
         title: '도구 사용 절차',
         lines: [
           '1. 보유한 타일 수를 색상별로 입력',
@@ -332,32 +311,17 @@ const STRINGS = {
         ],
       },
       {
+        title: '이 도구가 유용한 경우',
+        lines: [
+          '말이 많아져 어떻게 배치해야 할지 모르는 경우, F2를 막 해금한 경우, 더 높은 전투력을 목표로 하는 분들께 추천합니다.',
+        ],
+      },
+      {
         title: 'F1 / F2 게임 내 설명',
         lines: [
           'F1: 일반 영웅 특기 슬롯',
           'F2: 타일 30개 이상 보유 시 해금되는 두 번째 슬롯',
           'F1과 F2에 타일을 최적으로 배분하여 전투력을 최대화',
-        ],
-      },
-      {
-        title: '최강 배치 설명',
-        lines: [
-          '최강 배치는 33개 타일 사용 (총 35칸 중)',
-          '파이터/슈터: 빨강×8, 초록×8, 금×7, 보라×8, 파랑×2',
-          '라이더: 빨강×2, 초록×8, 금×7, 보라×8, 파랑×8',
-          '금 타일 7개 이상이면 L자 배치가 항상 최적',
-        ],
-      },
-      {
-        title: '이 도구에 대하여',
-        lines: [
-          '이 도구는 퍼즐 & 서바이벌의 영웅 특기(체스 배치)를 자동으로 최적화합니다. 보유한 말의 수만 입력하면 전투력이 최대가 되는 F1/F2 배치를 계산합니다.',
-        ],
-      },
-      {
-        title: '이 도구가 유용한 경우',
-        lines: [
-          '말이 많아져 어떻게 배치해야 할지 모르는 경우, F2를 막 해금한 경우, 더 높은 전투력을 목표로 하는 분들께 추천합니다.',
         ],
       },
       {
@@ -418,6 +382,12 @@ const STRINGS = {
     howToUseTitle: 'Инструкция',
     howToUseSections: [
       {
+        title: 'Об инструменте',
+        lines: [
+          'Этот инструмент автоматически оптимизирует особенности героев (расстановку фигур) в игре Puzzle & Survival. Просто введите количество имеющихся у вас фигур, и он рассчитает оптимальную расстановку F1/F2 для максимальной боевой мощи.',
+        ],
+      },
+      {
         title: 'Как пользоваться инструментом',
         lines: [
           '1. Введите количество плиток по цветам',
@@ -426,32 +396,17 @@ const STRINGS = {
         ],
       },
       {
+        title: 'Когда пригодится инструмент',
+        lines: [
+          'Подходит для тех, кто не знает, как расставить увеличившееся количество фигур, кто только что открыл F2, а также для тех, кто стремится к более высокой боевой мощи.',
+        ],
+      },
+      {
         title: 'F1 / F2 — игровые слоты',
         lines: [
           'F1: Стандартный слот особенности героя',
           'F2: Второй слот, открывается при 30+ плитках',
           'Оптимально распределяет плитки между F1 и F2 для максимальной силы',
-        ],
-      },
-      {
-        title: 'Лучшая расстановка',
-        lines: [
-          'Лучшая конфигурация использует 33 плитки (из 35 ячеек)',
-          'Боец/Стрелок: Красный×8, Зелёный×8, Золотой×7, Фиолетовый×8, Синий×2',
-          'Всадник: Красный×2, Зелёный×8, Золотой×7, Фиолетовый×8, Синий×8',
-          'При 7+ золотых плитках Г-образная расстановка всегда оптимальна',
-        ],
-      },
-      {
-        title: 'Об инструменте',
-        lines: [
-          'Этот инструмент автоматически оптимизирует особенности героев (расстановку фигур) в игре Puzzle & Survival. Просто введите количество имеющихся у вас фигур, и он рассчитает оптимальную расстановку F1/F2 для максимальной боевой мощи.',
-        ],
-      },
-      {
-        title: 'Когда пригодится инструмент',
-        lines: [
-          'Подходит для тех, кто не знает, как расставить увеличившееся количество фигур, кто только что открыл F2, а также для тех, кто стремится к более высокой боевой мощи.',
         ],
       },
       {
