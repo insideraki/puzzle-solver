@@ -72,6 +72,13 @@ const STRINGS = {
       '広告配信（Google AdSense）を行う予定があります。',
       '個人情報の収集は行っていません。',
     ],
+    minUnit: '分',
+    secUnit: '秒',
+    completedIn: '{t}で完了',
+    shareHeader: '【パズル&サバイバル 英雄特技】',
+    sharePower: '戦力+',
+    shareStatus: ' / 有効ステータス',
+    shareFooter: '無料最適化ツール🔥',
   },
   en: {
     title: 'Puzzle & Survival\nHero Specialty Optimizer',
@@ -140,6 +147,13 @@ const STRINGS = {
       'Ads (Google AdSense) may be displayed in the future.',
       'No personal information is collected.',
     ],
+    minUnit: 'm ',
+    secUnit: 's',
+    completedIn: 'Completed in {t}',
+    shareHeader: '[Puzzle & Survival Hero Specialty]',
+    sharePower: 'Power+',
+    shareStatus: ' / Active Stats: ',
+    shareFooter: 'Free Optimizer Tool 🔥',
   },
   zh: {
     title: '末日喧嚣\n英雄专长优化器',
@@ -209,6 +223,13 @@ const STRINGS = {
       '未来可能会展示广告（Google AdSense）。',
       '本站不收集任何个人信息。',
     ],
+    minUnit: '分',
+    secUnit: '秒',
+    completedIn: '{t}内完成',
+    shareHeader: '【末日喧嚣 英雄专长】',
+    sharePower: '战力+',
+    shareStatus: ' / 有效状态: ',
+    shareFooter: '免费优化工具🔥',
   },
   ko: {
     title: 'HERO OPTIMIZER\n퍼즐 & 서바이벌 영웅 특기 최적화기',
@@ -277,6 +298,13 @@ const STRINGS = {
       '향후 광고(Google AdSense)가 표시될 수 있습니다.',
       '개인 정보는 수집하지 않습니다.',
     ],
+    minUnit: '분 ',
+    secUnit: '초',
+    completedIn: '{t}만에 완료',
+    shareHeader: '【퍼즐 & 서바이벌 영웅 특기】',
+    sharePower: '전투력+',
+    shareStatus: ' / 활성 스탯: ',
+    shareFooter: '무료 최적화 도구🔥',
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
@@ -345,6 +373,13 @@ const STRINGS = {
       'В будущем возможно размещение рекламы (Google AdSense).',
       'Личные данные пользователей не собираются.',
     ],
+    minUnit: 'м ',
+    secUnit: 'с',
+    completedIn: 'Завершено за {t}',
+    shareHeader: '[Puzzle & Survival Особенность Героя]',
+    sharePower: 'Сила+',
+    shareStatus: ' / Активных статов: ',
+    shareFooter: 'Бесплатный оптимизатор🔥',
   },
 }
 
@@ -390,7 +425,12 @@ function buildShareText(pattern, t) {
       .map(s => `${s}+${b[key][s]}%`)
     return parts.length ? `${label}: ${parts.join(' / ')}` : null
   }).filter(Boolean)
-  return `【パズル&サバイバル 英雄特技】\n戦力+${pattern.power.toLocaleString()} / 有効ステータス${pattern.status_count}\n${lines.join('\n')}\n無料最適化ツール🔥\n${TOOL_URL}`
+  return `${t.shareHeader}\n${t.sharePower}${pattern.power.toLocaleString()}${t.shareStatus}${pattern.status_count}\n${lines.join('\n')}\n${t.shareFooter}\n${TOOL_URL}`
+}
+
+function formatElapsed(t, { min, sec }) {
+  const timeStr = min > 0 ? `${min}${t.minUnit}${sec}${t.secUnit}` : `${sec}${t.secUnit}`
+  return t.completedIn.replace('{t}', timeStr)
 }
 
 // ============================================================
@@ -763,7 +803,7 @@ export default function App() {
             const elapsed = Date.now() - startTimeRef.current
             const min = Math.floor(elapsed / 60000)
             const sec = Math.floor((elapsed % 60000) / 1000)
-            setElapsedTime(min > 0 ? `${min}分${sec}秒` : `${sec}秒`)
+            setElapsedTime({ min, sec })
           }
           break
         case 'error':
@@ -909,7 +949,7 @@ export default function App() {
 
       {status === 'error' && <div className="no-result">{t.err}</div>}
 
-      {elapsedTime && <div className="elapsed-time">{elapsedTime}で完了</div>}
+      {elapsedTime && <div className="elapsed-time">{formatElapsed(t, elapsedTime)}</div>}
 
       {status === 'done' && result && (
         result.total === 0
