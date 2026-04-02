@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker run:*)",
+      "Bash(cp C:/Users/AP100/Documents/GitHub/puzzle-solver-api/solver.js C:/Users/AP100/Documents/GitHub/puzzle-solver/public/solver.js)",
+      "Bash(cp C:/Users/AP100/Documents/GitHub/puzzle-solver-api/solver.wasm C:/Users/AP100/Documents/GitHub/puzzle-solver/public/solver.wasm)",
+      "Bash(cd:*)",
+      "Bash(npm run:*)",
+      "Bash(printf '\\\\n.search-note {\\\\n  font-size: 0.75rem;\\\\n  color: #888;\\\\n  text-align: center;\\\\n  margin-top: 6px;\\\\n}\\\\n')",
+      "Bash(\"C:\\\\Users\\\\AP100\\\\Documents\\\\GitHub\\\\puzzle-solver\\\\src\\\\App.css\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

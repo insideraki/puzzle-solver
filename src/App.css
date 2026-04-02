@@ -635,3 +635,120 @@ body {
   white-space: pre-line;
   line-height: 1.7;
 }
+
+/* ---- 使い方アコーディオン ---- */
+.how-to-use {
+  margin: 12px 0 4px;
+  border: 1px solid #252525;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.how-to-use-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #151515;
+  border: none;
+  color: #888;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+}
+.how-to-use-toggle:hover { background: #1c1c1c; }
+
+.accordion-chevron {
+  display: inline-block;
+  font-size: 14px;
+  color: #555;
+  transition: transform 0.2s;
+}
+.accordion-chevron.open { transform: rotate(180deg); }
+
+.how-to-use-body {
+  background: #111;
+  padding: 6px 8px 8px;
+  border-top: 1px solid #1e1e1e;
+}
+
+.how-to-use-item {
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.how-to-use-item:last-child { margin-bottom: 0; }
+
+.how-to-use-item-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #161616;
+  border: none;
+  color: #777;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 10px;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 6px;
+}
+.how-to-use-item-toggle:hover { background: #1e1e1e; color: #999; }
+
+.how-to-use-list {
+  list-style: none;
+  padding: 8px 10px 6px 14px;
+  margin: 0;
+  background: #0f0f0f;
+  border-radius: 0 0 6px 6px;
+}
+.how-to-use-list li {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.8;
+  padding-left: 8px;
+  position: relative;
+}
+.how-to-use-list li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: #B79949;
+}
+
+/* ---- フッター（プライバシーポリシー） ---- */
+.site-footer {
+  margin-top: 24px;
+  padding: 14px 14px 20px;
+  border-top: 1px solid #1e1e1e;
+}
+
+.footer-title {
+  font-size: 11px;
+  color: #555;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-list li {
+  font-size: 11px;
+  color: #444;
+  line-height: 1.9;
+  padding-left: 10px;
+  position: relative;
+}
+.footer-list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: #333;
+}

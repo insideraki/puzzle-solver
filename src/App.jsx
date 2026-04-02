@@ -38,6 +38,40 @@ const STRINGS = {
     numpad_cancel: 'キャンセル',
     numpad_confirm: '確定',
     numpad_next: '確定→次へ',
+    howToUseTitle: '使い方',
+    howToUseSections: [
+      {
+        title: 'ツールの使い方手順',
+        lines: [
+          '1. 手持ちのチェス駒を色ごとに入力',
+          '2.「計算スタート」を押す',
+          '3. 戦力上位の配置がカルーセルで表示される',
+        ],
+      },
+      {
+        title: 'F1 / F2 のゲーム内説明',
+        lines: [
+          'F1：通常の英雄特技スロット',
+          'F2：手持ち駒が30個以上で解放される第2スロット',
+          'F1とF2に駒を最適配分して戦力を最大化する',
+        ],
+      },
+      {
+        title: '最強配置の解説',
+        lines: [
+          '最強配置は33個使用（35マス中）',
+          'ファイター/シューター：赤8・緑8・金7・紫8・青2',
+          'ライダー：赤2・緑8・金7・紫8・青8',
+          '金7個以上でL字配置が確定最適',
+        ],
+      },
+    ],
+    privacyTitle: 'プライバシーポリシー',
+    privacyLines: [
+      'Google Analytics によるアクセス解析を行っています。',
+      '広告配信（Google AdSense）を行う予定があります。',
+      '個人情報の収集は行っていません。',
+    ],
   },
   en: {
     title: 'Puzzle & Survival\nHero Specialty Optimizer',
@@ -72,6 +106,40 @@ const STRINGS = {
     numpad_cancel: 'Cancel',
     numpad_confirm: 'OK',
     numpad_next: 'OK → Next',
+    howToUseTitle: 'How to Use',
+    howToUseSections: [
+      {
+        title: 'How to Use This Tool',
+        lines: [
+          '1. Enter your available tiles by color',
+          '2. Press "Start"',
+          '3. Top placements are shown in the carousel',
+        ],
+      },
+      {
+        title: 'F1 / F2 In-Game Slots',
+        lines: [
+          'F1: Standard hero specialty slot',
+          'F2: Second slot, unlocked with 30+ tiles',
+          'Optimally distributes tiles across F1 and F2 to maximize power',
+        ],
+      },
+      {
+        title: 'Best Placement Guide',
+        lines: [
+          'Best setup uses 33 tiles (out of 35 slots)',
+          'Fighter/Shooter: Red×8, Green×8, Gold×7, Purple×8, Blue×2',
+          'Rider: Red×2, Green×8, Gold×7, Purple×8, Blue×8',
+          'With 7+ Gold tiles, L-shape placement is always optimal',
+        ],
+      },
+    ],
+    privacyTitle: 'Privacy Policy',
+    privacyLines: [
+      'This site uses Google Analytics to collect anonymous access data.',
+      'Ads (Google AdSense) may be displayed in the future.',
+      'No personal information is collected.',
+    ],
   },
   zh: {
     title: '末日喧嚣\n英雄专长优化器',
@@ -107,6 +175,40 @@ const STRINGS = {
     numpad_cancel: '取消',
     numpad_confirm: '确定',
     numpad_next: '确定→下一个',
+    howToUseTitle: '使用说明',
+    howToUseSections: [
+      {
+        title: '使用步骤',
+        lines: [
+          '1. 按颜色输入手持棋子数量',
+          '2. 点击「开始计算」',
+          '3. 最优配置将在轮播图中显示',
+        ],
+      },
+      {
+        title: 'F1 / F2 游戏内说明',
+        lines: [
+          'F1：普通英雄专长槽位',
+          'F2：持有30个以上棋子时解锁的第二槽位',
+          '在F1和F2之间最优分配棋子以最大化战力',
+        ],
+      },
+      {
+        title: '最强配置解析',
+        lines: [
+          '最强配置使用33个棋子（共35格）',
+          '近战/射击兵：红×8、绿×8、金×7、紫×8、蓝×2',
+          '骑乘兵：红×2、绿×8、金×7、紫×8、蓝×8',
+          '金棋子7个以上时，L形配置为确定最优',
+        ],
+      },
+    ],
+    privacyTitle: '隐私政策',
+    privacyLines: [
+      '本站使用 Google Analytics 进行匿名访问分析。',
+      '未来可能会展示广告（Google AdSense）。',
+      '本站不收集任何个人信息。',
+    ],
   },
   ru: {
     title: 'Puzzle & Survival\nОптимизатор Особенности Героя',
@@ -141,6 +243,40 @@ const STRINGS = {
     numpad_cancel: 'Отмена',
     numpad_confirm: 'ОК',
     numpad_next: 'ОК → Далее',
+    howToUseTitle: 'Инструкция',
+    howToUseSections: [
+      {
+        title: 'Как пользоваться инструментом',
+        lines: [
+          '1. Введите количество плиток по цветам',
+          '2. Нажмите «Начать»',
+          '3. Лучшие расстановки отобразятся в карусели',
+        ],
+      },
+      {
+        title: 'F1 / F2 — игровые слоты',
+        lines: [
+          'F1: Стандартный слот особенности героя',
+          'F2: Второй слот, открывается при 30+ плитках',
+          'Оптимально распределяет плитки между F1 и F2 для максимальной силы',
+        ],
+      },
+      {
+        title: 'Лучшая расстановка',
+        lines: [
+          'Лучшая конфигурация использует 33 плитки (из 35 ячеек)',
+          'Боец/Стрелок: Красный×8, Зелёный×8, Золотой×7, Фиолетовый×8, Синий×2',
+          'Всадник: Красный×2, Зелёный×8, Золотой×7, Фиолетовый×8, Синий×8',
+          'При 7+ золотых плитках Г-образная расстановка всегда оптимальна',
+        ],
+      },
+    ],
+    privacyTitle: 'Политика конфиденциальности',
+    privacyLines: [
+      'Сайт использует Google Analytics для анонимного анализа посещаемости.',
+      'В будущем возможно размещение рекламы (Google AdSense).',
+      'Личные данные пользователей не собираются.',
+    ],
   },
 }
 
@@ -243,6 +379,56 @@ function ShareButtons({ pattern, t }) {
       </div>
       {toast && <div className="toast-msg">{t.copied}</div>}
     </div>
+  )
+}
+
+// ============================================================
+// 使い方アコーディオン
+// ============================================================
+function HowToUse({ t }) {
+  const [openIndex, setOpenIndex] = useState(null)
+  const [mainOpen, setMainOpen] = useState(false)
+
+  const toggle = (i) => setOpenIndex(prev => prev === i ? null : i)
+
+  return (
+    <div className="how-to-use">
+      <button className="how-to-use-toggle" onClick={() => setMainOpen(v => !v)}>
+        <span>{t.howToUseTitle}</span>
+        <span className={`accordion-chevron${mainOpen ? ' open' : ''}`}>▾</span>
+      </button>
+      {mainOpen && (
+        <div className="how-to-use-body">
+          {t.howToUseSections.map((sec, i) => (
+            <div key={i} className="how-to-use-item">
+              <button className="how-to-use-item-toggle" onClick={() => toggle(i)}>
+                <span>{sec.title}</span>
+                <span className={`accordion-chevron${openIndex === i ? ' open' : ''}`}>▾</span>
+              </button>
+              {openIndex === i && (
+                <ul className="how-to-use-list">
+                  {sec.lines.map((line, j) => <li key={j}>{line}</li>)}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
+// フッター（プライバシーポリシー）
+// ============================================================
+function Footer({ t }) {
+  return (
+    <footer className="site-footer">
+      <div className="footer-title">{t.privacyTitle}</div>
+      <ul className="footer-list">
+        {t.privacyLines.map((line, i) => <li key={i}>{line}</li>)}
+      </ul>
+    </footer>
   )
 }
 
@@ -627,6 +813,8 @@ export default function App() {
           ))}
         </div>
 
+        <HowToUse t={t} />
+
         <div className="search-btn-wrap">
           {status === 'loading' ? (
             <button className="search-btn" onClick={handleCancel}>
@@ -685,6 +873,7 @@ export default function App() {
           t={t}
         />
       )}
+      <Footer t={t} />
     </div>
   )
 }
