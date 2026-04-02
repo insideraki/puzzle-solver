@@ -93,6 +93,7 @@ const STRINGS = {
     minUnit: '分',
     secUnit: '秒',
     completedIn: '{t}で完了',
+    pageTitle: 'Puzzle & Survival - 英雄特技 最適化ツール',
     shareHeader: '【パズル&サバイバル 英雄特技】',
     sharePower: '戦力+',
     shareStatus: ' / 有効ステータス',
@@ -186,6 +187,7 @@ const STRINGS = {
     minUnit: 'm ',
     secUnit: 's',
     completedIn: 'Completed in {t}',
+    pageTitle: 'Puzzle & Survival - Hero Skill Optimizer',
     shareHeader: '[Puzzle & Survival Hero Specialty]',
     sharePower: 'Power+',
     shareStatus: ' / Active Stats: ',
@@ -280,6 +282,7 @@ const STRINGS = {
     minUnit: '分',
     secUnit: '秒',
     completedIn: '{t}完成',
+    pageTitle: 'Puzzle & Survival - 英雄专长优化工具',
     shareHeader: '【末日喧嚣 英雄专长】',
     sharePower: '战力+',
     shareStatus: ' / 有效状态: ',
@@ -373,6 +376,7 @@ const STRINGS = {
     minUnit: '분 ',
     secUnit: '초',
     completedIn: '{t} 완료',
+    pageTitle: 'Puzzle & Survival - 영웅 특기 최적화 도구',
     shareHeader: '【퍼즐 & 서바이벌 영웅 특기】',
     sharePower: '전투력+',
     shareStatus: ' / 활성 스탯: ',
@@ -466,6 +470,7 @@ const STRINGS = {
     minUnit: 'м ',
     secUnit: 'с',
     completedIn: 'Завершено за {t}',
+    pageTitle: 'Puzzle & Survival - Оптимизатор особенностей героя',
     shareHeader: '[Puzzle & Survival Особенность Героя]',
     sharePower: 'Сила+',
     shareStatus: ' / Активных статов: ',
@@ -904,6 +909,10 @@ export default function App() {
     }
     workerRef.current = w
   }, [])
+
+  useEffect(() => {
+    document.title = STRINGS[lang].pageTitle
+  }, [lang])
 
   useEffect(() => {
     createWorker()
