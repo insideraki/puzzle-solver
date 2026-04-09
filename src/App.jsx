@@ -76,10 +76,12 @@ const STRINGS = {
       },
     ],
     privacyTitle: 'プライバシーポリシー',
-    privacyLines: [
-      'Google Analytics によるアクセス解析を行っています。',
-      '広告配信（Google AdSense）を行う予定があります。',
-      '個人情報の収集は行っていません。',
+    privacySections: [
+      { heading: '広告の配信について', text: '当サイトは、Google AdSenseを利用しています。Googleを含む第三者配信事業者はCookieを使用して、ユーザーが当サイトや他のサイトに過去にアクセスした際の情報に基づいて広告を配信します。Googleがどのようにデータを使用するかについては、こちらをご覧ください。' },
+      { heading: 'Cookieについて', text: '当サイトではGoogle AdSenseによる広告配信のためにCookieを使用することがあります。ユーザーはブラウザの設定によりCookieを無効にすることができます。ただし、Cookieを無効にした場合、一部の機能が正常に動作しない場合があります。' },
+      { heading: 'アクセス解析について', text: '当サイトはサービス向上のためアクセス解析ツールを使用する場合があります。収集される情報は匿名であり、個人を特定するものではありません。' },
+      { heading: '免責事項', text: '当サイトの解法はアルゴリズムによる自動生成であり、結果の正確性を保証するものではありません。当サイトを利用して生じたいかなる損害についても責任を負いません。「パズル＆サバイバル」は権利者の商標・著作物です。当サイトは非公式のファンツールです。' },
+      { heading: 'お問い合わせ', text: '当サイトに関するご意見・ご要望はGitHubリポジトリのIssueにてお寄せください。', isContact: true },
     ],
     minUnit: '分',
     secUnit: '秒',
@@ -161,10 +163,12 @@ const STRINGS = {
       },
     ],
     privacyTitle: 'Privacy Policy',
-    privacyLines: [
-      'This site uses Google Analytics to collect anonymous access data.',
-      'Ads (Google AdSense) may be displayed in the future.',
-      'No personal information is collected.',
+    privacySections: [
+      { heading: 'About Ad Delivery', text: 'This site uses Google AdSense. Google and third-party vendors use cookies to serve ads based on your prior visits to this site or other sites. Learn more about how Google uses data.' },
+      { heading: 'About Cookies', text: 'This site may use cookies for ad delivery via Google AdSense. You can disable cookies in your browser settings. Note that disabling cookies may cause some features to not function properly.' },
+      { heading: 'About Access Analytics', text: 'This site may use access analytics tools to improve its service. Information collected is anonymous and does not identify individuals.' },
+      { heading: 'Disclaimer', text: 'Solutions provided by this site are algorithmically generated and accuracy is not guaranteed. We assume no responsibility for any damages arising from use of this site. "Puzzles & Survival" is a trademark and copyrighted work of its respective owner. This site is an unofficial fan tool.' },
+      { heading: 'Contact', text: 'For feedback or requests, please open an Issue on our GitHub repository.', isContact: true },
     ],
     minUnit: 'm ',
     secUnit: 's',
@@ -247,10 +251,12 @@ const STRINGS = {
       },
     ],
     privacyTitle: '隐私政策',
-    privacyLines: [
-      '本站使用 Google Analytics 进行匿名访问分析。',
-      '未来可能会展示广告（Google AdSense）。',
-      '本站不收集任何个人信息。',
+    privacySections: [
+      { heading: '关于广告投放', text: '本网站使用Google AdSense。Google及第三方广告商会使用Cookie，根据您过去访问本网站或其他网站的记录来投放广告。了解Google如何使用数据，请点击此处。' },
+      { heading: '关于Cookie', text: '本网站可能使用Cookie进行Google AdSense广告投放。您可以通过浏览器设置禁用Cookie。但禁用Cookie后，部分功能可能无法正常使用。' },
+      { heading: '关于访问分析', text: '本网站可能使用访问分析工具以改善服务。收集的信息为匿名信息，不会识别个人身份。' },
+      { heading: '免责声明', text: '本网站的解法由算法自动生成，不保证结果的准确性。因使用本网站而产生的任何损失，本站概不负责。"Puzzles & Survival"为权利方的商标及著作物。本网站为非官方粉丝工具。' },
+      { heading: '联系方式', text: '如有意见或建议，请在GitHub仓库的Issue中提交。', isContact: true },
     ],
     minUnit: '分',
     secUnit: '秒',
@@ -332,10 +338,12 @@ const STRINGS = {
       },
     ],
     privacyTitle: '개인정보 처리방침',
-    privacyLines: [
-      'Google Analytics를 사용하여 익명 방문 데이터를 수집합니다.',
-      '향후 광고(Google AdSense)가 표시될 수 있습니다.',
-      '개인 정보는 수집하지 않습니다.',
+    privacySections: [
+      { heading: '광고 게재에 대하여', text: '본 사이트는 Google AdSense를 이용합니다. Google을 포함한 제3자 광고 사업자는 쿠키를 사용하여 사용자가 본 사이트 또는 다른 사이트를 과거에 방문한 정보를 기반으로 광고를 게재합니다. Google의 데이터 사용 방식에 대해서는 여기를 참조하십시오.' },
+      { heading: '쿠키에 대하여', text: '본 사이트는 Google AdSense를 통한 광고 게재를 위해 쿠키를 사용할 수 있습니다. 사용자는 브라우저 설정을 통해 쿠키를 비활성화할 수 있습니다. 단, 쿠키를 비활성화하면 일부 기능이 정상적으로 작동하지 않을 수 있습니다.' },
+      { heading: '액세스 분석에 대하여', text: '본 사이트는 서비스 향상을 위해 액세스 분석 도구를 사용할 수 있습니다. 수집되는 정보는 익명이며 개인을 특정하지 않습니다.' },
+      { heading: '면책사항', text: '본 사이트의 해법은 알고리즘에 의해 자동 생성되며 결과의 정확성을 보장하지 않습니다. 본 사이트 이용으로 인해 발생한 어떠한 손해에 대해서도 책임을 지지 않습니다. 「Puzzles & Survival」은 권리자의 상표 및 저작물입니다. 본 사이트는 비공식 팬 툴입니다.' },
+      { heading: '문의', text: '본 사이트에 관한 의견·요청은 GitHub 저장소의 Issue를 통해 제출해 주십시오。', isContact: true },
     ],
     minUnit: '분 ',
     secUnit: '초',
@@ -417,10 +425,12 @@ const STRINGS = {
       },
     ],
     privacyTitle: 'Политика конфиденциальности',
-    privacyLines: [
-      'Сайт использует Google Analytics для анонимного анализа посещаемости.',
-      'В будущем возможно размещение рекламы (Google AdSense).',
-      'Личные данные пользователей не собираются.',
+    privacySections: [
+      { heading: 'О показе рекламы', text: 'Этот сайт использует Google AdSense. Google и сторонние поставщики используют файлы cookie для показа рекламы на основе ваших предыдущих посещений этого и других сайтов. Узнайте больше о том, как Google использует данные.' },
+      { heading: 'О файлах cookie', text: 'На этом сайте могут использоваться файлы cookie для показа рекламы через Google AdSense. Вы можете отключить cookie в настройках браузера. Обратите внимание, что отключение cookie может привести к некорректной работе некоторых функций.' },
+      { heading: 'Об анализе посещаемости', text: 'Сайт может использовать инструменты анализа посещаемости для улучшения сервиса. Собираемая информация является анонимной и не позволяет идентифицировать личность.' },
+      { heading: 'Отказ от ответственности', text: 'Решения, предоставляемые сайтом, генерируются автоматически алгоритмом, и точность результатов не гарантируется. Мы не несём ответственности за любой ущерб, возникший в результате использования сайта. «Puzzles & Survival» является товарным знаком и объектом авторского права правообладателя. Данный сайт является неофициальным фан-инструментом.' },
+      { heading: 'Контакты', text: 'По вопросам и предложениям обращайтесь через раздел Issue в репозитории GitHub.', isContact: true },
     ],
     minUnit: 'м ',
     secUnit: 'с',
@@ -579,13 +589,25 @@ function HowToUse({ t }) {
 // ============================================================
 // フッター（プライバシーポリシー）
 // ============================================================
+const GITHUB_ISSUES = 'https://github.com/insideraki/puzzle-solver/issues'
+
 function Footer({ t }) {
   return (
     <footer className="site-footer">
       <div className="footer-title">{t.privacyTitle}</div>
-      <ul className="footer-list">
-        {t.privacyLines.map((line, i) => <li key={i}>{line}</li>)}
-      </ul>
+      <div className="footer-sections">
+        {t.privacySections.map((sec, i) => (
+          <div key={i} className="footer-section">
+            <div className="footer-section-heading">{sec.heading}</div>
+            <p className="footer-section-text">
+              {sec.text}
+              {sec.isContact && (
+                <> <a href={GITHUB_ISSUES} target="_blank" rel="noopener noreferrer" className="footer-link">→ GitHub Issues</a></>
+              )}
+            </p>
+          </div>
+        ))}
+      </div>
     </footer>
   )
 }
