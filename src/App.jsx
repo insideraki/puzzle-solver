@@ -589,7 +589,7 @@ function HowToUse({ t }) {
 // ============================================================
 // フッター（プライバシーポリシー）
 // ============================================================
-const GITHUB_ISSUES = 'https://github.com/insideraki/puzzle-solver/issues'
+const CONTACT_FORM = 'https://forms.gle/BsSYTngjnEf3wmZc8'
 
 function Footer({ t }) {
   return (
@@ -602,7 +602,7 @@ function Footer({ t }) {
             <p className="footer-section-text">
               {sec.text}
               {sec.isContact && (
-                <> <a href={GITHUB_ISSUES} target="_blank" rel="noopener noreferrer" className="footer-link">→ GitHub Issues</a></>
+                <> <a href={CONTACT_FORM} target="_blank" rel="noopener noreferrer" className="footer-link">→ お問い合わせフォーム</a></>
               )}
             </p>
           </div>
