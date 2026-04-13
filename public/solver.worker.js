@@ -81,6 +81,25 @@ const LOG_STRINGS = {
     search_done:  ()           => `[Поиск] завершён`,
     best_f1:      (r,b,g,pu,go) => `[Поиск] лучшее F1: кр=${r} си=${b} зл=${g} фи=${pu} зо=${go}`,
   },
+  ko: {
+    unit: { fighter:'파이터', shooter:'슈터', rider:'라이더' },
+    skill1_start: (l)           => `[특기1] ${l}: 계산 중...`,
+    skill1_done:  (l,p,n)       => `[특기1] ${l} 완료: power=${p}  유효=${n}`,
+    skill1_none:  (l)           => `[특기1] ${l} → 배치 없음`,
+    skill1_adopt: (l,p)         => `[특기1] 채용: ${l}  power=${p}`,
+    skill2_rest:  (r)           => `[특기2] 남은 말: 빨강=${r[0]} 파랑=${r[1]} 초록=${r[2]} 보라=${r[3]} 금=${r[4]}`,
+    skill2_start: (l)           => `[특기2] ${l}: 계산 중...`,
+    skill2_none:  ()            => `[특기2] 배치 없음 → 특기1만 채용`,
+    skill2_done:  (p,n)         => `[특기2] 완료: power=${p}  유효=${n}`,
+    total:        (p)           => `[완료]  합계 전투력UP = +${p}`,
+    best:         (b4,yp4,p,n)  => `[best]  power=${p}  b4=${b4}  yp4=${yp4}  유효=${n}`,
+    candidates:   (n)           => `[탐색] 배분 후보: ${n}가지`,
+    parallel:     (n)           => `[탐색] ${n}개 병렬 계산 중...`,
+    progress:     (d,t)         => `[진행] ${d}/${t}`,
+    best_update:  (p)           => `⚡ 최고 전투력 갱신: +${p}`,
+    search_done:  ()            => `[탐색] 완료`,
+    best_f1:      (r,b,g,pu,go) => `[탐색] 최적 F1 배분: 빨강=${r} 파랑=${b} 초록=${g} 보라=${pu} 금=${go}`,
+  },
 }
 
 // ============================================================
