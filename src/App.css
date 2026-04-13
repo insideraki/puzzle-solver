@@ -997,3 +997,17 @@ body {
   white-space: nowrap;
   margin-left: 8px;
 }
+
+.hero-history-delete {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.hero-history-delete:hover {
+  color: #e00055;
+}

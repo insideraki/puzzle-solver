@@ -929,6 +929,15 @@ export default function App() {
     })
   }, [result]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const deleteHeroHistory = (e, name) => {
+    e.stopPropagation()
+    setHeroHistory(prev => {
+      const next = prev.filter(h => h.name !== name)
+      localStorage.setItem('heroHistory', JSON.stringify(next))
+      return next
+    })
+  }
+
   const loadHeroHistory = (h) => {
     skipSaveRef.current = true
     const restoredHand = {
@@ -1050,6 +1059,13 @@ export default function App() {
                   <span className="hero-history-meta">
                     +{h.bestPower.toLocaleString()} / {new Date(h.savedAt).toLocaleDateString()}
                   </span>
+                  <button
+                    onMouseDown={(e) => deleteHeroHistory(e, h.name)}
+                    className="hero-history-delete"
+                    title="削除"
+                  >
+                    ×
+                  </button>
                 </li>
               ))}
             </ul>
