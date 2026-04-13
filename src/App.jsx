@@ -853,8 +853,14 @@ export default function App() {
   const [logs, setLogs] = useState([])
   const [wasmReady, setWasmReady] = useState(false)
   const [elapsedTime, setElapsedTime] = useState(null)
+  const [heroName, setHeroName] = useState('')
+  const [heroHistory, setHeroHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('heroHistory')) || [] } catch { return [] }
+  })
+  const [showHistoryDropdown, setShowHistoryDropdown] = useState(false)
   const workerRef = useRef(null)
   const startTimeRef = useRef(null)
+  const skipSaveRef = useRef(false)
   const t = STRINGS[lang]
 
   // ── Worker生成 ──
@@ -895,6 +901,52 @@ export default function App() {
     createWorker()
     return () => workerRef.current?.terminate()
   }, [createWorker])
+
+  // 計算完了時に英雄履歴を保存
+  useEffect(() => {
+    if (skipSaveRef.current) { skipSaveRef.current = false; return }
+    if (!result || result.total === 0) return
+    const name = heroName.trim() || '名前なし'
+    const hand = [
+      resultHand?.red    ?? 0,
+      resultHand?.blue   ?? 0,
+      resultHand?.green  ?? 0,
+      resultHand?.purple ?? 0,
+      resultHand?.gold   ?? 0,
+    ]
+    const entry = {
+      name,
+      hand,
+      bestPower: result.patterns[0].power,
+      results: result.patterns,
+      savedAt: Date.now(),
+    }
+    setHeroHistory(prev => {
+      const filtered = prev.filter(h => h.name !== name)
+      const next = [entry, ...filtered].slice(0, 20)
+      localStorage.setItem('heroHistory', JSON.stringify(next))
+      return next
+    })
+  }, [result]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadHeroHistory = (h) => {
+    skipSaveRef.current = true
+    const restoredHand = {
+      red:    h.hand[0],
+      blue:   h.hand[1],
+      green:  h.hand[2],
+      purple: h.hand[3],
+      gold:   h.hand[4],
+    }
+    setHeroName(h.name === '名前なし' ? '' : h.name)
+    setPieces(restoredHand)
+    setResultHand(restoredHand)
+    setResult({ total: h.results.length, patterns: h.results })
+    setStatus('done')
+    setLogs([])
+    setElapsedTime(null)
+    setShowHistoryDropdown(false)
+  }
 
   const handleChange = (color, val) =>
     setPieces(prev => ({ ...prev, [color]: Math.max(0, parseInt(val) || 0) }))
@@ -975,6 +1027,35 @@ export default function App() {
       </div>
 
       <div className="chest-section">
+        <div style={{ position: 'relative', marginBottom: '12px' }}>
+          <input
+            type="text"
+            value={heroName}
+            onChange={e => setHeroName(e.target.value)}
+            onFocus={() => setShowHistoryDropdown(true)}
+            onBlur={() => setTimeout(() => setShowHistoryDropdown(false), 200)}
+            placeholder="英雄名（省略可）"
+            maxLength={30}
+            className="hero-name-input"
+          />
+          {showHistoryDropdown && heroHistory.length > 0 && (
+            <ul className="hero-history-dropdown">
+              {heroHistory.map((h, i) => (
+                <li
+                  key={i}
+                  onMouseDown={() => loadHeroHistory(h)}
+                  className="hero-history-item"
+                >
+                  <span>{h.name}</span>
+                  <span className="hero-history-meta">
+                    +{h.bestPower.toLocaleString()} / {new Date(h.savedAt).toLocaleDateString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <div className="chest-label">{t.chest}</div>
         <div className="chest-row">
           {COLORS.map(color => (
