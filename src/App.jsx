@@ -25,7 +25,7 @@ const STRINGS = {
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
     err: 'エラーが発生しました。もう一度試してください。',
     share: 'シェア',
-    tweet: '#パズサバ #パズル%26サバイバル #PuzzlesAndSurvival 英雄特技最適化ツール https://puzzle-solver-bice.vercel.app',
+    tweet: '#パズサバ #パズル&サバイバル #PuzzlesAndSurvival 英雄特技最適化ツール https://puzzle-solver-bice.vercel.app',
     discord_copy: 'Discord にコピー',
     copied: 'クリップボードにコピーしました',
     computing: '計算中...',
@@ -112,7 +112,7 @@ const STRINGS = {
     none: 'No patterns found.\nTry adding more pieces.',
     err: 'An error occurred. Please try again.',
     share: 'Share',
-    tweet: '#PuzzlesAndSurvival #パズサバ #パズル%26サバイバル Hero Skill Optimizer https://puzzle-solver-bice.vercel.app',
+    tweet: '#PuzzlesAndSurvival #パズサバ #パズル&サバイバル Hero Skill Optimizer https://puzzle-solver-bice.vercel.app',
     discord_copy: 'Copy for Discord',
     copied: 'Copied to clipboard',
     computing: 'Computing...',
@@ -199,7 +199,7 @@ const STRINGS = {
     none: '未找到可配置方案\n请增加棋子数量',
     err: '发生错误，请重试',
     share: '分享',
-    tweet: '#PuzzlesAndSurvival #パズサバ #パズル%26サバイバル 英雄技能优化工具 https://puzzle-solver-bice.vercel.app',
+    tweet: '#PuzzlesAndSurvival #パズサバ #パズル&サバイバル 英雄技能优化工具 https://puzzle-solver-bice.vercel.app',
     weibo: '微博',
     discord_copy: '复制到Discord',
     copied: '已复制到剪贴板',
@@ -541,7 +541,6 @@ function ShareButtons({ pattern, t }) {
         {t.weibo ? (
           <a className="share-btn btn-weibo" href={`http://service.weibo.com/share/share.php?url=${encodeURIComponent(TOOL_URL)}&title=${encodeURIComponent(t.tweet)}`} target="_blank" rel="noreferrer"><IconWeibo /> {t.weibo}</a>
         ) : null}
-        <a className="share-btn btn-fb" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(TOOL_URL)}`} target="_blank" rel="noreferrer"><IconFB /> Facebook</a>
         <a className="share-btn btn-line" href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(TOOL_URL)}&text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><IconLINE /> LINE</a>
         <button className="share-btn btn-discord" onClick={handleDiscord}><IconDiscord /> {t.discord_copy}</button>
       </div>
