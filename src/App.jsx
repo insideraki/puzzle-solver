@@ -1177,28 +1177,43 @@ export default function App() {
           target="_blank"
           rel="noopener noreferrer"
           className="related-tool-banner"
+          style={{ padding: 0, overflow: 'hidden', display: 'block' }}
         >
-          <div className="related-tool-inner">
-            <div className="related-tool-title">
-              🧪 {{
-                ja: 'エヴァの実験室（試験管パズル）攻略ツール',
-                en: "Eva's Lab Puzzle Solver",
-                zh: '伊娃的实验室（试管拼图）解题工具',
-                ru: 'Решатель головоломки лаборатории Евы',
-                ko: '에바의 실험실（시험관 퍼즐）해결 도구',
-              }[lang] ?? "Eva's Lab Puzzle Solver"}
-            </div>
-            <div className="related-tool-desc">
-              {{
-                ja: '最短手順を自動で解きます',
-                en: 'Auto-solves in the fewest steps',
-                zh: '自动以最短步骤求解',
-                ru: 'Автоматически решает за минимум шагов',
-                ko: '최단 단계로 자동으로 해결합니다',
-              }[lang] ?? 'Auto-solves in the fewest steps'}
+          <div style={{ position: 'relative' }}>
+            <img
+              src="/eva-lab.png"
+              alt="Eva's Lab"
+              style={{ width: '100%', display: 'block', borderRadius: '10px' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: '10px 16px',
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
+              borderRadius: '0 0 10px 10px',
+            }}>
+              <div className="related-tool-title">
+                🧪 {{
+                  ja: 'エヴァの実験室（試験管パズル）攻略ツール',
+                  en: "Eva's Lab Puzzle Solver",
+                  zh: '伊娃的实验室（试管拼图）解题工具',
+                  ru: 'Решатель головоломки лаборатории Евы',
+                  ko: '에바의 실험실（시험관 퍼즐）해결 도구',
+                }[lang] ?? "Eva's Lab Puzzle Solver"}
+              </div>
+              <div className="related-tool-desc">
+                {{
+                  ja: '最短手順を自動で解きます',
+                  en: 'Auto-solves in the fewest steps',
+                  zh: '自动以最短步骤求解',
+                  ru: 'Автоматически решает за минимум шагов',
+                  ko: '최단 단계로 자동으로 해결합니다',
+                }[lang] ?? 'Auto-solves in the fewest steps'}
+              </div>
             </div>
           </div>
-          <div className="related-tool-arrow">→</div>
         </a>
       </div>
       <Footer t={t} />
