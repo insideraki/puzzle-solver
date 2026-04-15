@@ -578,6 +578,21 @@ function HowToUse({ t }) {
                   {sec.lines.map((line, j) => <li key={j}>{line}</li>)}
                 </ul>
               )}
+              {openIndex === i && i === 0 && (
+                <img
+                  src="/hero-specialty.png"
+                  alt="Hero Specialty screen"
+                  style={{
+                    width: '100%',
+                    maxWidth: '320px',
+                    borderRadius: '8px',
+                    marginTop: '12px',
+                    display: 'block',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                  }}
+                />
+              )}
             </div>
           ))}
         </div>
