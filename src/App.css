@@ -938,11 +938,6 @@ body {
   border-color: #88aaff;
   background: linear-gradient(135deg, #1a2a3a, #2a1a3a);
 }
-.related-tool-label {
-  font-size: 0.7rem;
-  color: #888;
-  margin-bottom: 4px;
-}
 .related-tool-title {
   font-size: 1rem;
   font-weight: bold;

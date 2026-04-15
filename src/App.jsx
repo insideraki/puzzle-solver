@@ -1165,9 +1165,24 @@ export default function App() {
           className="related-tool-banner"
         >
           <div className="related-tool-inner">
-            <div className="related-tool-label">同じ作者の関連ツール</div>
-            <div className="related-tool-title">🧪 エヴァの実験室 攻略ツール</div>
-            <div className="related-tool-desc">Puzzle &amp; Survival「エヴァの実験室」を自動で解きます</div>
+            <div className="related-tool-title">
+              🧪 {{
+                ja: 'エヴァの実験室（試験管パズル）攻略ツール',
+                en: "Eva's Lab Puzzle Solver",
+                zh: '伊娃的实验室（试管拼图）解题工具',
+                ru: 'Решатель головоломки лаборатории Евы',
+                ko: '에바의 실험실（시험관 퍼즐）해결 도구',
+              }[lang] ?? "Eva's Lab Puzzle Solver"}
+            </div>
+            <div className="related-tool-desc">
+              {{
+                ja: '最短手順を自動で解きます',
+                en: 'Auto-solves in the fewest steps',
+                zh: '自动以最短步骤求解',
+                ru: 'Автоматически решает за минимум шагов',
+                ko: '최단 단계로 자동으로 해결합니다',
+              }[lang] ?? 'Auto-solves in the fewest steps'}
+            </div>
           </div>
           <div className="related-tool-arrow">→</div>
         </a>
