@@ -1177,7 +1177,7 @@ export default function App() {
           target="_blank"
           rel="noopener noreferrer"
           className="related-tool-banner"
-          style={{ padding: 0, overflow: 'hidden', display: 'block' }}
+          style={{ padding: 0, overflow: 'hidden', display: 'block', borderRadius: '10px' }}
         >
           <div style={{ position: 'relative' }}>
             <img
@@ -1185,16 +1185,7 @@ export default function App() {
               alt="Eva's Lab"
               style={{ width: '100%', display: 'block', borderRadius: '10px' }}
             />
-            {/* Free 15/15 を隠すオーバーレイ */}
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              width: '200px',
-              height: '60px',
-              background: 'rgba(0,0,0,0.85)',
-              borderRadius: '0 0 0 10px',
-            }} />
+            {/* Free 15/15 を隠すオーバーレイは画像処理済みのため不要 */}
             <div style={{
               position: 'absolute',
               bottom: 0,
