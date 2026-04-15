@@ -25,7 +25,7 @@ const STRINGS = {
     none: '配置できるパターンが見つかりませんでした。\nチェスを増やしてください。',
     err: 'エラーが発生しました。もう一度試してください。',
     share: 'シェア',
-    tweet: '#パズサバ #パズル＆サバイバル #PuzzlesAndSurvival 英雄特技最適化ツール https://puzzle-solver-bice.vercel.app',
+    tweet: '#パズサバ #PuzzlesAndSurvival 英雄特技最適化ツール https://puzzle-solver-bice.vercel.app',
     discord_copy: 'Discord にコピー',
     copied: 'クリップボードにコピーしました',
     computing: '計算中...',
