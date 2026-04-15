@@ -915,6 +915,51 @@ body {
 }
 .footer-link:hover { color: var(--gold); opacity: 1; text-decoration: underline; }
 
+/* ---- 関連ツールバナー ---- */
+.related-tools {
+  width: 100%;
+  max-width: 480px;
+  margin: 24px auto 0;
+  padding: 0 12px;
+}
+.related-tool-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #1a2a1a, #2a1a2a);
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+.related-tool-banner:hover {
+  border-color: #88aaff;
+  background: linear-gradient(135deg, #1a2a3a, #2a1a3a);
+}
+.related-tool-label {
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+.related-tool-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ddf;
+  margin-bottom: 2px;
+}
+.related-tool-desc {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+.related-tool-arrow {
+  font-size: 1.2rem;
+  color: #88aaff;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
 /* ---- アニメーション ---- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }

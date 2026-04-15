@@ -1156,6 +1156,22 @@ export default function App() {
           t={t}
         />
       )}
+      {/* 関連ツールバナー */}
+      <div className="related-tools">
+        <a
+          href="https://water-sort-solver2.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="related-tool-banner"
+        >
+          <div className="related-tool-inner">
+            <div className="related-tool-label">同じ作者の関連ツール</div>
+            <div className="related-tool-title">🧪 エヴァの実験室 攻略ツール</div>
+            <div className="related-tool-desc">Puzzle &amp; Survival「エヴァの実験室」を自動で解きます</div>
+          </div>
+          <div className="related-tool-arrow">→</div>
+        </a>
+      </div>
       <Footer t={t} />
     </div>
   )
