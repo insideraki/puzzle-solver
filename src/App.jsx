@@ -35,6 +35,7 @@ const STRINGS = {
     close: '閉じる',
     tapToContinue: 'タップして続ける',
     colors: { green:'緑', blue:'青', purple:'紫', gold:'金', red:'赤' },
+    heroNamePlaceholder: '英雄名（任意）',
     numpad_cancel: 'キャンセル',
     numpad_confirm: '確定',
     numpad_next: '確定→次へ',
@@ -122,6 +123,7 @@ const STRINGS = {
     close: 'Close',
     tapToContinue: 'Tap to continue',
     colors: { green:'Green', blue:'Blue', purple:'Purple', gold:'Gold', red:'Red' },
+    heroNamePlaceholder: 'Hero name (optional)',
     numpad_cancel: 'Cancel',
     numpad_confirm: 'OK',
     numpad_next: 'OK → Next',
@@ -210,6 +212,7 @@ const STRINGS = {
     close: '关闭',
     tapToContinue: '点击继续',
     colors: { green:'绿', blue:'蓝', purple:'紫', gold:'金', red:'红' },
+    heroNamePlaceholder: '英雄名（可选）',
     numpad_cancel: '取消',
     numpad_confirm: '确定',
     numpad_next: '确定→下一个',
@@ -297,6 +300,7 @@ const STRINGS = {
     close: '닫기',
     tapToContinue: '탭하여 계속',
     colors: { green:'초록', blue:'파랑', purple:'보라', gold:'금', red:'빨강' },
+    heroNamePlaceholder: '영웅 이름 (선택)',
     numpad_cancel: '취소',
     numpad_confirm: '확인',
     numpad_next: '확인 → 다음',
@@ -384,6 +388,7 @@ const STRINGS = {
     close: 'Закрыть',
     tapToContinue: 'Нажмите, чтобы продолжить',
     colors: { green:'Зелёный', blue:'Синий', purple:'Фиолетовый', gold:'Золотой', red:'Красный' },
+    heroNamePlaceholder: 'Имя героя (необязательно)',
     numpad_cancel: 'Отмена',
     numpad_confirm: 'ОК',
     numpad_next: 'ОК → Далее',
@@ -1057,7 +1062,7 @@ export default function App() {
             onChange={e => setHeroName(e.target.value)}
             onFocus={() => setShowHistoryDropdown(true)}
             onBlur={() => setTimeout(() => setShowHistoryDropdown(false), 200)}
-            placeholder="英雄名（省略可）"
+            placeholder={t.heroNamePlaceholder}
             maxLength={30}
             className="hero-name-input"
           />
