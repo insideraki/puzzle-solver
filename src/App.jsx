@@ -101,6 +101,7 @@ const STRINGS = {
       { heading: '免責事項', text: '当サイトの解法はアルゴリズムによる自動生成であり、結果の正確性を保証するものではありません。当サイトを利用して生じたいかなる損害についても責任を負いません。「パズル＆サバイバル」は権利者の商標・著作物です。当サイトは非公式のファンツールです。' },
       { heading: 'お問い合わせ', text: '当サイトに関するご意見・ご要望はGitHubリポジトリのIssueにてお寄せください。', isContact: true },
     ],
+    contactLink: '→ お問い合わせフォーム',
     minUnit: '分',
     secUnit: '秒',
     completedIn: '{t}で完了',
@@ -189,6 +190,7 @@ const STRINGS = {
       { heading: 'Disclaimer', text: 'Solutions provided by this site are algorithmically generated and accuracy is not guaranteed. We assume no responsibility for any damages arising from use of this site. "Puzzles & Survival" is a trademark and copyrighted work of its respective owner. This site is an unofficial fan tool.' },
       { heading: 'Contact', text: 'For feedback or requests, please open an Issue on our GitHub repository.', isContact: true },
     ],
+    contactLink: '→ Contact Form',
     minUnit: 'm ',
     secUnit: 's',
     completedIn: 'Completed in {t}',
@@ -278,6 +280,7 @@ const STRINGS = {
       { heading: '免责声明', text: '本网站的解法由算法自动生成，不保证结果的准确性。因使用本网站而产生的任何损失，本站概不负责。"Puzzles & Survival"为权利方的商标及著作物。本网站为非官方粉丝工具。' },
       { heading: '联系方式', text: '如有意见或建议，请在GitHub仓库的Issue中提交。', isContact: true },
     ],
+    contactLink: '→ 联系表单',
     minUnit: '分',
     secUnit: '秒',
     completedIn: '{t}完成',
@@ -366,6 +369,7 @@ const STRINGS = {
       { heading: '면책사항', text: '본 사이트의 해법은 알고리즘에 의해 자동 생성되며 결과의 정확성을 보장하지 않습니다. 본 사이트 이용으로 인해 발생한 어떠한 손해에 대해서도 책임을 지지 않습니다. 「Puzzles & Survival」은 권리자의 상표 및 저작물입니다. 본 사이트는 비공식 팬 툴입니다.' },
       { heading: '문의', text: '본 사이트에 관한 의견·요청은 GitHub 저장소의 Issue를 통해 제출해 주십시오。', isContact: true },
     ],
+    contactLink: '→ 문의 양식',
     minUnit: '분 ',
     secUnit: '초',
     completedIn: '{t} 완료',
@@ -454,6 +458,7 @@ const STRINGS = {
       { heading: 'Отказ от ответственности', text: 'Решения, предоставляемые сайтом, генерируются автоматически алгоритмом, и точность результатов не гарантируется. Мы не несём ответственности за любой ущерб, возникший в результате использования сайта. «Puzzles & Survival» является товарным знаком и объектом авторского права правообладателя. Данный сайт является неофициальным фан-инструментом.' },
       { heading: 'Контакты', text: 'По вопросам и предложениям обращайтесь через раздел Issue в репозитории GitHub.', isContact: true },
     ],
+    contactLink: '→ Форма обратной связи',
     minUnit: 'м ',
     secUnit: 'с',
     completedIn: 'Завершено за {t}',
@@ -638,7 +643,7 @@ function Footer({ t }) {
             <p className="footer-section-text">
               {sec.text}
               {sec.isContact && (
-                <> <a href={CONTACT_FORM} target="_blank" rel="noopener noreferrer" className="footer-link">→ お問い合わせフォーム</a></>
+                <> <a href={CONTACT_FORM} target="_blank" rel="noopener noreferrer" className="footer-link">{t.contactLink}</a></>
               )}
             </p>
           </div>
