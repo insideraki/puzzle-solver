@@ -1059,16 +1059,29 @@ export default function App() {
   return (
     <div className="app">
       <div className="header">
-        <div className="title">
-          {t.title.split('\n').map((line, i) => <div key={i} className={i === 2 ? 'title-sub' : ''}>{line}</div>)}
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '10px' }}>
+          <img
+            src="/hero-specialty.png"
+            alt={t.title.replace(/\n/g, ' ')}
+            style={{ width: '100%', display: 'block', borderRadius: '10px' }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            padding: '10px 16px',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
+            borderRadius: '0 0 10px 10px',
+          }}>
+            <div className="related-tool-title">{t.title.split('\n')[0]}</div>
+            <div className="related-tool-desc">{t.title.split('\n')[1]}</div>
+          </div>
+          <select className="lang-select" value={lang} onChange={e => setLang(e.target.value)}>
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+            <option value="ko">한국어</option>
+            <option value="ru">Русский</option>
+          </select>
         </div>
-        <select className="lang-select" value={lang} onChange={e => setLang(e.target.value)}>
-          <option value="ja">日本語</option>
-          <option value="en">English</option>
-          <option value="zh">中文</option>
-          <option value="ko">한국어</option>
-          <option value="ru">Русский</option>
-        </select>
       </div>
 
       <div className="chest-section">

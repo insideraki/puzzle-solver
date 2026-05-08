@@ -43,22 +43,8 @@ body {
 
 /* ---- ヘッダー ---- */
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin-bottom: 16px;
-  position: relative;
-}
-
-.title {
-  font-family: 'Rajdhani', sans-serif;
-  text-align: center;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 0.06em;
-  line-height: 1.5;
-  text-shadow: 0 0 20px rgba(240,192,96,0.3);
+  padding: 0 12px;
 }
 
 .lang-select {
@@ -70,7 +56,9 @@ body {
   padding: 4px 8px;
   cursor: pointer;
   position: absolute;
-  right: 0;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
   transition: border-color var(--transition), color var(--transition);
 }
 .lang-select:focus  { outline: none; border-color: var(--border-highlight); }
