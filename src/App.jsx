@@ -1059,16 +1059,16 @@ export default function App() {
   return (
     <div className="app">
       <div className="header">
-        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '10px' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '10px', aspectRatio: '1101 / 481' }}>
           <img
             src="/hero-specialty.png"
             alt={t.title.replace(/\n/g, ' ')}
-            style={{ width: '100%', display: 'block', borderRadius: '10px' }}
+            style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover', objectPosition: 'center', borderRadius: '10px' }}
           />
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0,
             padding: '10px 16px',
-            background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.88))',
             borderRadius: '0 0 10px 10px',
           }}>
             <div className="related-tool-title">{t.title.split('\n')[0]}</div>
