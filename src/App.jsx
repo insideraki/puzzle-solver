@@ -1,5 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
+const AdmaxAd = () => {
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://adm.shinobi.jp/s/e9898f018316857120c533b474d1f166'
+    script.async = true
+    document.body.appendChild(script)
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
+  return <div style={{ textAlign: 'center', margin: '16px 0' }} />
+}
+
 const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
 const TOOL_URL = 'https://puzzle-solver-bice.vercel.app'
 const isMobile = window.matchMedia('(pointer: coarse)').matches
@@ -1164,6 +1177,7 @@ export default function App() {
               </>
             : <Carousel patterns={result.patterns} hand={resultHand} t={t} />
       )}
+      <AdmaxAd />
       {isMobile && numpadTarget && (
         <NumpadPopup
           color={numpadTarget}
