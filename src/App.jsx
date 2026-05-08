@@ -2,8 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 
 const AdmaxAd = () => {
   useEffect(() => {
+    const isSP = window.innerWidth < 768
+    const src = isSP
+      ? 'https://adm.shinobi.jp/s/e9898f018316857120c533b474d1f166'
+      : 'https://adm.shinobi.jp/s/6e3228b9c87bb8f8803424ce57944e65'
     const script = document.createElement('script')
-    script.src = 'https://adm.shinobi.jp/s/e9898f018316857120c533b474d1f166'
+    script.src = src
     script.async = true
     document.body.appendChild(script)
     return () => {
