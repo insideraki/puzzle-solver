@@ -462,6 +462,8 @@ self.onmessage = async (e) => {
           }
 
           const swapField = (field) => field.map(c => c === 'red' ? 'blue' : c === 'blue' ? 'red' : c)
+          const SWAP_PID = { 1:3, 3:1, 6:8, 8:6, 4:5, 5:4, 9:10, 10:9, 11:13, 13:11, 16:18, 18:16 }
+          const swapPatternIds = (pids) => pids.map(p => SWAP_PID[p] ?? p)
           // 重複判定キー：総戦力 + バフ内容が同じなら同一とみなす
           const patternKey = (pat) => {
             const b = pat.buffs
@@ -498,11 +500,14 @@ self.onmessage = async (e) => {
               patterns.push(pat)
             }
 
-            // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加（同一バフは除外）
+            // 赤=青の枚数が同じ場合、赤↔青スワップ版を追加（バフを再計算して同一なら除外）
             if (hand[0] === hand[1]) {
               const swapped = {
                 ...pat,
-                fields: pat.fields.map(f => ({ ...f, field: swapField(f.field) }))
+                fields: pat.fields.map(f => ({ ...f, field: swapField(f.field) })),
+                buffs: r2 && r2.power > 0
+                  ? mergeBuffs(calcBuffs(swapPatternIds(r1.patterns)), calcBuffs(swapPatternIds(r2.patterns)))
+                  : calcBuffs(swapPatternIds(r1.patterns))
               }
               const swapKey = patternKey(swapped)
               if (!seen.has(swapKey)) {
