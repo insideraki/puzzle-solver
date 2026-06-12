@@ -3,18 +3,31 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 const AdmaxAd = () => {
   useEffect(() => {
     const isSP = window.innerWidth < 768
-    const src = isSP
-      ? 'https://adm.shinobi.jp/s/e9898f018316857120c533b474d1f166'
-      : 'https://adm.shinobi.jp/s/6e3228b9c87bb8f8803424ce57944e65'
-    const script = document.createElement('script')
-    script.src = src
-    script.async = true
-    document.body.appendChild(script)
+    const id = isSP
+      ? 'e9898f018316857120c533b474d1f166'
+      : '6e3228b9c87bb8f8803424ce57944e65'
+    if (!window.admaxads) window.admaxads = []
+    if (!window.admaxads.some(ad => ad.admax_id === id)) {
+      window.admaxads.push({ admax_id: id, type: 'banner' })
+    }
+    const tag = document.createElement('script')
+    tag.src = 'https://adm.shinobi.jp/st/t.js'
+    tag.async = true
+    document.body.appendChild(tag)
     return () => {
-      document.body.removeChild(script)
+      document.body.removeChild(tag)
+      window.admaxads = window.admaxads.filter(ad => ad.admax_id !== id)
+      window.__admax_tag__ = undefined
     }
   }, [])
-  return <div style={{ textAlign: 'center', margin: '16px 0' }} />
+  const id = typeof window !== 'undefined' && window.innerWidth < 768
+    ? 'e9898f018316857120c533b474d1f166'
+    : '6e3228b9c87bb8f8803424ce57944e65'
+  return (
+    <div style={{ textAlign: 'center', margin: '16px 0' }}>
+      <div className="admax-ads" data-admax-id={id} style={{ display: 'inline-block' }} />
+    </div>
+  )
 }
 
 const COLORS = ['green', 'blue', 'purple', 'gold', 'red']
