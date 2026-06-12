@@ -24,7 +24,7 @@ const AdmaxAd = () => {
     ? 'e9898f018316857120c533b474d1f166'
     : '6e3228b9c87bb8f8803424ce57944e65'
   return (
-    <div style={{ textAlign: 'center', margin: '16px 0' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
       <div className="admax-ads" data-admax-id={id} style={{ display: 'inline-block' }} />
     </div>
   )
